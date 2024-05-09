@@ -1,5 +1,5 @@
 import argparse
-import Temporary.CreateAdmin as CreateAdmin
+#import Temporary.CreateAdmin as CreateAdmin
 import json
 import hashlib
 
@@ -11,7 +11,7 @@ def hashing(password):
     sha256.update(password)
     return sha256.hexdigest()
 
-def SignUp(email, usename, password):
+def SignUp(email, username, password):
     def check(email, username):
         isValid = True
         for i in range(len(email)):
@@ -30,13 +30,26 @@ def SignUp(email, usename, password):
             raise Exception('Password must be 8 or more characters.')
            
         if isValid:
-            with open('AllFiles.users', 'a') as file:
-                if email in file or username in file:
+            with open('AllFiles.users', 'a') as file: #this is for appending in file we can not read email in file , fix it
+                if email in json.load(file) or username in json.load(file):
                     raise Exception('This email or username exist. Try another one or use Login.')
                 else:
                     file.append(json.dumps({"Email":email, "Username":username, "Password":hashing(password)}))
         
-
+def log_in(email , username , password):
+    def check(username , password):
+        with open('AllFiles.users', 'r') as file:
+            if username in json.load(file):
+                correct_password = json.load(file)[username]["Password"]
+                this_password = hashing(password)
+                if this_password == correct_password:
+                    pass
+                    #constructor
+                else:
+                    raise Exception('Invalid password!!')
+            else:
+                raise Exception('Invalid username!!')
+                
 def execute_command():
     parser = argparse.ArgumentParser(description='Create an Admin')
     subparser = parser.add_subparsers(dest='command', help='sub-command help')
