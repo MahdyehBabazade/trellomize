@@ -3,6 +3,34 @@ import argparse
 import json
 import hashlib
 
+class User:
+    def __init__(self):
+        self.username = ''
+        self.password = ''
+        self.email = ''
+    def set_username(self , username):
+        self.username = username
+    def set_password(self , password):
+        self.password = password
+    def set_email(self , email):
+        self.email = email
+
+    #def getUsername(self):
+    #    return self.username
+    #def getPassword(self):
+    #    return self.password
+    #def getEmail(self):
+    #    return self.email
+    
+    def delete_acount():
+        with open('AllFiles.users' , 'rw') as file:
+            lines = file.readline()
+            lines = [line for line in lines if  email in file ]
+            file.writelines(lines)
+    def Build_project():
+        pass
+
+
 def hashing(password):
     sha256 = hashlib.sha256()
     sha256.update(password)
@@ -28,7 +56,7 @@ def SignUp(email, username, password):
         return isValid
     
     if check():
-            with open('AllFiles.users', 'a') as file: #this is for appending in file we can not read email in file , fix it
+            with open('AllFiles.users', 'ar') as file:
                 if email in json.load(file) or username in json.load(file):
                     raise Exception('This email or username exist. Try another one or use Login if you have already signed up.')
                 else:
