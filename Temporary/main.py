@@ -10,6 +10,13 @@ def choose_by_key(items):
     current_pos = 0
     choice = 0
     while True:
+        os.system('cls')
+        for i in range(len(items)):
+            if i == current_pos:
+                console.print(Panel(items[i]), style="green")
+            else:
+                console.print(Panel(items[i], border_style="bold purple4"))
+        console.print("Press 'q' to quit.", style="grey69")
         key = msvcrt.getch() #it returns a byte
         if key == b"w" and current_pos > 0:
             current_pos -= 1
@@ -20,13 +27,6 @@ def choose_by_key(items):
         elif key == b"\r": #this is for Enter
             choice = current_pos
             break
-        os.system('cls')
-        for i in range(len(items)):
-            if i == current_pos:
-                console.print(Panel(items[i]), style="green")
-            else:
-                console.print(Panel(items[i], border_style="bold purple4"))
-        console.print("Press 'q' to quit.", style="grey69")
     return choice
 
 def introduction():
@@ -41,10 +41,11 @@ def introduction():
 
 def menu():
     introduction()
-    myList = ["[grey70]SIGNUP[/]","[grey70]LOGIN[/]"]
-    if choose_by_key(myList) == 0:
+    myList = ["[grey70]SIGNUP[/]", "[grey70]LOGIN[/]"]
+    choice = choose_by_key(myList)
+    if choice == 0:
         signup_page()
-    elif choose_by_key(myList) == 1:
+    elif choice == 1:
         login_page()
         
 
