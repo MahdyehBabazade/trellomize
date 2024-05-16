@@ -59,18 +59,18 @@ def sign_up(email, username, password):
     user = User(email, username, password)
     save_to_file(user)
 
-def login(username, password):
+def correct_password(username , password):
     filename = f"AllFiles.Users/{username}.json"
-    if not os.path.exists(filename):
-        raise FileNotFoundError(f"User {username} does not exist.")
-    
     with open(filename, 'r') as file:
         data = json.load(file)
-        correct_password = data.get("password")
-        if not correct_password:
+        my_password = data.get("password")
+        if not my_password:
             raise KeyError("Password not found in user data.")
-        
-        if hashing(password) == correct_password:
-            return User(data["email"], username, password)
-        else:
-            raise ValueError('Invalid password.')
+        return hashing(password) == my_password
+
+def correct_username(username):
+    return os.path.exists(f"Users/{username}.json")  #??
+
+def login(username, password):
+    filename = f"AllFiles.Users/{username}.json"
+    file = open(filename , "r")

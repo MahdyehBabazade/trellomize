@@ -88,14 +88,30 @@ def signup_page():
         console.print("\nPassword must be 8 or more characters!", style="red")
         console.print("[bold purple4]Enter you password: [/]\n")
         password = input()
-
     user.sign_up(email, username, password)
+
 def login_page():
     console = Console()
     os.system('cls')
     console.print("Enter your email or username: ", style="bold purple4")
     username = input()
-    user.login()
+    while not user.correct_username(username):
+        os.system('cls')
+        console.print("Invalid username!\n", style="red")
+        console.print("[bold purple4]Enter you username (or try sing in): [/]\n")
+        username = input()
+
+    console.print("[bold purple4]Enter you password: [/]\n")
+    password = input()
+    while not user.correct_password(password):
+        os.system('cls')
+        console.print("[bold purple4]Enter you username: [/]\n")
+        console.print(username)
+        console.print("\nInvalid password!", style="red")
+        console.print("[bold purple4]Enter you password: [/]\n")
+        password = input()
+
+    user.login(username , password)
 
 
 menu()
