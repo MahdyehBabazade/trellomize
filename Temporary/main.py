@@ -17,11 +17,18 @@ def choose_by_key(items):
             else:
                 console.print(Panel(items[i], border_style="bold purple4"))
         console.print("Press 'q' to quit.", style="grey69")
-        key = msvcrt.getch() #it returns a byte
-        if key == b"w" and current_pos > 0:
-            current_pos -= 1
-        elif key == b"s" and current_pos < len(items) - 1:
-            current_pos += 1
+        key = msvcrt.getch() # getch returns a byte
+        if (key == b"w" or key == b"H"): # H  is for PgUp
+            if current_pos > 0:
+                current_pos -= 1
+            elif current_pos == 0:
+                current_pos = len(items)-1
+            
+        elif (key == b"s" or key== b"P"): # P is for PgDn
+            if current_pos < len(items) - 1:
+                current_pos += 1
+            elif current_pos == len(items)-1:
+                current_pos = 0
         elif key == b"q":
             sys.exit()
         elif key == b"\r": #this is for Enter
