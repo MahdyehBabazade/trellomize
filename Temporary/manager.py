@@ -1,4 +1,5 @@
 import argparse
+import time
 
 def create_admin(username, password):
     print(f"Username: {username}, Password: {password}")
@@ -7,6 +8,7 @@ def purge_data():
     confirmation = input("Are you sure you want to purge all data? This action cannot be undone. (yes/no): ")
     if confirmation.lower() == 'yes':
         print("Purging all data...")
+        time.sleep(2)
         pass
         print("All data has been purged.")
     else:
