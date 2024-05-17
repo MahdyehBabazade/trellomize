@@ -69,7 +69,7 @@ def correct_password(username , password):
         return hashing(password) == my_password
 
 def correct_username(username): 
-    dir = os.path.join("AllFiles\\Users", f"{username}.json")
+    dir = os.path.join("AllFiles.Users", f"{username}.json")
     if not os.path.exists(dir):
         return False
     return True
