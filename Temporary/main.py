@@ -103,7 +103,7 @@ def login_page():
 
     console.print("[bold purple4]Enter you password: [/]\n")
     password = input()
-    while not user.correct_password(password):
+    while not user.correct_password(username , password):
         os.system('cls')
         console.print("[bold purple4]Enter you username: [/]\n")
         console.print(username)

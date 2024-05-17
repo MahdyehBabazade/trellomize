@@ -68,9 +68,9 @@ def correct_password(username , password):
             raise KeyError("Password not found in user data.")
         return hashing(password) == my_password
 
-def correct_username(username):
-    return os.path.exists(f"Users/{username}.json")  #??
+def correct_username(username): 
+    return os.path.join("AllFiles\\Users", f"{username}.json")
 
 def login(username, password):
-    filename = f"AllFiles.Users/{username}.json"
-    file = open(filename , "r")
+    with open(f"AllFiles.Users/{username}.json" , "r") as file: #it does not find direction
+        data = json.load(file)
