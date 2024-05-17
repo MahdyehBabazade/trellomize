@@ -3,3 +3,5 @@ __pycache__/
 *.pyc
 myenv/
 *.pyc
+*.json
+Temporary/__pycache__/user.cpython-312.pyc
