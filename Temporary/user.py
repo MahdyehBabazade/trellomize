@@ -79,8 +79,9 @@ def sign_up(email, username, password):
     user = User(email, username, password)
     save_to_file(user)
 
-def correct_password(username , password):
-    filename = f"AllFiles.Users/{username}.json"
+def correct_password(email , password):
+    directory = "AllFiles\\Users"
+    filename = os.path.join(directory, f"{email}.json")
     with open(filename, 'r') as file:
         data = json.load(file)
         my_password = data.get("password")
@@ -91,18 +92,21 @@ def correct_password(username , password):
             raise KeyError(str(error))
         return hashing(password) == my_password
 
-def correct_username(username): 
-    dir = os.path.join("AllFiles.Users", f"{username}.json")
-    if not os.path.exists(dir):
+def correct_email(email): 
+    directory = "AllFiles\\Users"
+    filename = os.path.join(directory, f"{email}.json")
+    if not os.path.exists(filename):
         return False
     return True
 
-def login(username, password):
-    with open(f"AllFiles.Users/{username}.json" , "r") as file: #it does not find direction
+def login(email, password):
+    directory = "AllFiles\\Users"
+    filename = os.path.join(directory, f"{email}.json")
+    with open(filename, 'r') as file:
         data = json.load(file)
         try:
-            if correct_username(username):
-                if correct_password(username, password):
+            if correct_email(email):
+                if correct_password(email, password):
                     return True
                 else:
                     raise Exception('Incorrect Password!')

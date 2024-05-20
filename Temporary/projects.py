@@ -2,13 +2,15 @@ import datetime
 import uuid
 
 class Project:
-    def __init__(self, title , Backlog , Todo , Doing , Done, Archived ):
+    def __init__(self, title , Backlog , Todo , Doing , Done, Archived , leader , collabrators):
         self.title = title
         self.__Backlog = Backlog
         self.__Todo = Todo
         self.__Doing = Doing
         self.__Done = Done
         self.__Archived = Archived
+        self.leader = leader
+        self.collabrators = collabrators
 
     #Setter
     def setTitle(self , title):
@@ -23,22 +25,31 @@ class Project:
         self.__Done = done
     def setArchived(self , archived):
         self.__Archived = archived
+    def setLeader(self , leader):
+        self.leader = leader
 
     #Getter
-    def getTitle():
+    def getTitle(self):
         return self.title
-    def getBachlog():
+    def getBachlog(self):
         return self.__Backlog
-    def getTodo():
+    def getTodo(self):
         return self.__Todo
-    def getDoing():
+    def getDoing(self):
         return self.__Doing
-    def getDone():
+    def getDone(self):
         return self.__Done
-    def getArchived():
+    def getArchived(self):
         return self.__Archived
+    def grtLeader(self):
+        return self.leader
 
+    #other
+    def add_collabrator(self , collabrator):
+        self.collabrators.append(collabrator)
     
+    def __del__(self):
+        print("Project is successfully deleted")
     #def setStatus(self , status):
     #    self.status = status
     #def getStatus(self):
@@ -53,6 +64,7 @@ class Task:
         self.__taskID = uuid.uuid1()
         self.__endtime = datetime.datetime.now()+datetime.timedelta(hours=24)
         self.__comments = []
+
     # Setters
     def setTitle(self, title):
         self.title = title
