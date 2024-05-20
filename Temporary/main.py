@@ -57,37 +57,52 @@ def menu():
         
 
 def signup_page():
+
     os.system('cls')
     console = Console()
+
     console.print("[bold purple4]Enter you email: [/]\n")
     email = input()
-    while not user.email_isvalid(email):
-        os.system('cls')
-        console.print("Invalid Email!\n", style="red")
-        console.print("[bold purple4]Enter you email: [/]\n")
-        email = input()
+    while  True:
+        try:
+            if user.email_isvalid(email):
+                break
+        except ValueError as error:
+            os.system('cls')
+            console.print(error, style="red")
+            console.print("[bold purple4]Enter you email: [/]\n")
+            email = input()
 
     console.print("[bold purple4]Enter you username: [/]\n")
     username = input()
-    while not user.username_isvalid(username):
-        os.system('cls')
-        console.print("[bold purple4]Enter you email: [/]\n")
-        console.print(email)
-        console.print("\nInvalid Username!", style="red")
-        console.print("[bold purple4]Enter you username: [/]\n")
-        username = input()
-
+    while True:
+        try:
+            if user.username_isvalid(username):
+                break
+        except ValueError as error:
+            os.system('cls')
+            console.print(error, style="red")
+            console.print("[bold purple4]Enter you email: [/]\n")
+            console.print(email)
+            console.print("[bold purple4]Enter you username: [/]\n")
+            username = input()
+            
     console.print("[bold purple4]Enter you password: [/]\n")
     password = input()
-    while not user.password_isvalid(password):
-        os.system('cls')
-        console.print("[bold purple4]Enter you email: [/]\n")
-        console.print(email)
-        console.print("\n[bold purple4]Enter your username: [/]\n")
-        console.print(username)
-        console.print("\nPassword must be 8 or more characters!", style="red")
-        console.print("[bold purple4]Enter you password: [/]\n")
-        password = input()
+    while  True:
+        try:
+            if user.password_isvalid(password):
+                break      
+        except ValueError as error:
+            os.system('cls')
+            console.print(error, style="red")
+            console.print("[bold purple4]Enter you email: [/]\n")
+            console.print(email)
+            console.print("[bold purple4]Enter you username: [/]\n")
+            console.print(username)
+            console.print("[bold purple4]Enter you password: [/]\n")
+            password = input()
+        
     user.sign_up(email, username, password)
 
 def login_page():

@@ -43,17 +43,37 @@ def hashing(password):
 
 
 def email_isvalid(email):
-    if not (email.endswith('@gmail.com') or email.endswith('@yahoo.com')):
-        return False
-    return True
+    output = False
+    try:
+        if not (email.endswith('@gmail.com') or email.endswith('@yahoo.com')):
+            raise ValueError('Invalid email!')
+        else:
+            output = True
+    except ValueError as error:
+        raise ValueError(str(error))
+    return output
+
 def username_isvalid(username):
-    if len(username) == 0:
-        return  False
-    return True
+    output = False
+    try:
+        if len(username) == 0:
+            raise ValueError('Invalid username')
+        else:
+            output = True
+    except ValueError as error:
+        raise ValueError(str(error))
+    return output
+
 def password_isvalid(password):    
-    if len(password) < 8:
-        return False
-    return True
+    output = False
+    try:
+        if len(password) < 8:
+            raise ValueError('Password must have at least 8 characters!')
+        else:
+            output = True
+    except ValueError as error:
+        raise ValueError(str(error))
+    return output
     
 def sign_up(email, username, password):
     user = User(email, username, password)
