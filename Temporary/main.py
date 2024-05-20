@@ -115,7 +115,7 @@ def login_page():
 
     while True:
         try:
-            if user.login(username, password):
+            if user.login(email, password):
                 console.print('Successfully logged in!')
                 break
         except Exception as error:
