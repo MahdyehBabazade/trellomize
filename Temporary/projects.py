@@ -14,34 +14,49 @@ class Project:
 class Task:
     def __init__(self, title, assignee, status='Backlog', priority='LOW'):
         self.title = title
-        self.assignees = assignee
-        self.status = status
-        self.priority = priority
-        self.taskID = uuid.uuid1()
-        self.endtime = datetime.datetime.now()+datetime.timedelta(hours=24)
-        self.comments = []
+        self.__assignees = assignee
+        self.__status = status
+        self.__priority = priority
+        self.__taskID = uuid.uuid1()
+        self.__endtime = datetime.datetime.now()+datetime.timedelta(hours=24)
+        self.__comments = []
     # Setters
     def setTitle(self, title):
         self.title = title
     def setAssignees(self, assignees):
-        self.assignees = assignees
+        self.__assignees = assignees
     def setStatus(self, status):
-        self.status = status
+        self.__status = status
     def setPriority(self, priority):
-        self.priority = priority
+        self.__priority = priority
     def setDescription(self, description):
         self.description = description
+    def setEndTime(self, endtime):
+        self.__endtime = endtime
     
     # Getters
     def getTitle(self):
         return self.title
     def getStatus(self):
-        return self.status
+        return self.__status
+    def getAssignees(self):
+        return self.__assignees
+    def getPriority(self):
+        return self.__priority
+    def getTaskID(self):
+        return self.__taskID
+    def getComments(self):
+        return self.__comments
+    def getEndTime(self):
+        return self.__endtime
+    
     
     # Others
     def addComment(self, comment):
-        self.comments.append(comment)
+        self.__comments.append(comment)
+    def deleteComment(self, comment):
+        self.__comments.remove(comment)
     def addAssignee(self, newAssignee):
-        self.assignees.append(newAssignee)
+        self.__assignees.append(newAssignee)
     def removeAssignee(self, assignee):
-        self.assignees.remove(assignee)
+        self.__assignees.remove(assignee)
