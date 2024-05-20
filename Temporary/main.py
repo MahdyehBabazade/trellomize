@@ -37,6 +37,7 @@ def choose_by_key(items):
     return choice
 
 def introduction():
+    os.system('cls')
     console = Console()
     introduction = "\n[bold italic]TRELLOMIZE[/]\n[grey70]Transform your project management experience with our innovative platform,\noffering streamlined coordination, real-time updates, and effective task management.[/]\n"
     console.print(introduction, justify="center")
