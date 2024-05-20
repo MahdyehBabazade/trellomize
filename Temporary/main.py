@@ -61,7 +61,7 @@ def signup_page():
     os.system('cls')
     console = Console()
 
-    console.print("[bold purple4]Enter you email: [/]\n")
+    console.print("[bold purple4]Enter you email: [/]")
     email = input()
     while  True:
         try:
@@ -70,10 +70,10 @@ def signup_page():
         except ValueError as error:
             os.system('cls')
             console.print(error, style="red")
-            console.print("[bold purple4]Enter you email: [/]\n")
+            console.print("[bold purple4]Enter you email: [/]")
             email = input()
 
-    console.print("[bold purple4]Enter you username: [/]\n")
+    console.print("[bold purple4]Enter you username: [/]")
     username = input()
     while True:
         try:
@@ -82,12 +82,12 @@ def signup_page():
         except ValueError as error:
             os.system('cls')
             console.print(error, style="red")
-            console.print("[bold purple4]Enter you email: [/]\n")
+            console.print("[bold purple4]Enter you email: [/]")
             console.print(email)
-            console.print("[bold purple4]Enter you username: [/]\n")
+            console.print("[bold purple4]Enter you username: [/]")
             username = input()
             
-    console.print("[bold purple4]Enter you password: [/]\n")
+    console.print("[bold purple4]Enter you password: [/]")
     password = input()
     while  True:
         try:
@@ -96,11 +96,11 @@ def signup_page():
         except ValueError as error:
             os.system('cls')
             console.print(error, style="red")
-            console.print("[bold purple4]Enter you email: [/]\n")
+            console.print("[bold purple4]Enter you email: [/]")
             console.print(email)
-            console.print("[bold purple4]Enter you username: [/]\n")
+            console.print("[bold purple4]Enter you username: [/]")
             console.print(username)
-            console.print("[bold purple4]Enter you password: [/]\n")
+            console.print("[bold purple4]Enter you password: [/]")
             password = input()
         
     user.sign_up(email, username, password)
@@ -108,10 +108,11 @@ def signup_page():
 def login_page():
     console = Console()
     os.system('cls')
-    console.print("Enter your email or username: ", style="bold purple4")
+    console.print("Enter your email: ", style="bold purple4")
     username = input()
-    console.print("[bold purple4]Enter you password: [/]\n")
+    console.print("[bold purple4]Enter your password: [/]")
     password = input()
+
     while True:
         try:
             if user.login(username, password):
@@ -119,6 +120,10 @@ def login_page():
                 break
         except Exception as error:
             console.print(str(error))
-
+            console.print("Try again: ")
+            console.print("[bold purple4]Enter your email: [/]")
+            username = input()
+            console.print("[bold purple4]Enter your password: [/]")
+            password = input()
 
 menu()

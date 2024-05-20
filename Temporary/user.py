@@ -32,7 +32,7 @@ def save_to_file(user):
     if not os.path.exists(directory):
         os.makedirs(directory)
     
-    filename = os.path.join(directory, f"{user.username}.json")
+    filename = os.path.join(directory, f"{user.email}.json")
     with open(filename, "w") as f:
         json.dump(user.__dict__, f, indent=4)
 
