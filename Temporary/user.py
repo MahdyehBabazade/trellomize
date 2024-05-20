@@ -84,8 +84,11 @@ def correct_password(username , password):
     with open(filename, 'r') as file:
         data = json.load(file)
         my_password = data.get("password")
-        if not my_password:
-            raise KeyError("Password not found in user data.")
+        try:
+            if not my_password:
+                raise KeyError("Password not found in user data.")
+        except KeyError as error:
+            raise KeyError(str(error))
         return hashing(password) == my_password
 
 def correct_username(username): 
@@ -97,3 +100,13 @@ def correct_username(username):
 def login(username, password):
     with open(f"AllFiles.Users/{username}.json" , "r") as file: #it does not find direction
         data = json.load(file)
+        try:
+            if correct_username(username):
+                if correct_password(username, password):
+                    return True
+                else:
+                    raise Exception('Incorrect Password!')
+            else:
+                raise Exception('User not found!')
+        except Exception as error:
+            raise Exception(str(error))
