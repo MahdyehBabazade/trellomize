@@ -2,14 +2,47 @@ import datetime
 import uuid
 
 class Project:
-    
-    def __init__(self, title):
-        # self.status = 'Backlog'
+    def __init__(self, title , Backlog , Todo , Doing , Done, Archived ):
         self.title = title
-    def setStatus(self , status):
-        self.status = status
-    def getStatus(self):
-        return self.status
+        self.__Backlog = Backlog
+        self.__Todo = Todo
+        self.__Doing = Doing
+        self.__Done = Done
+        self.__Archived = Archived
+
+    #Setter
+    def setTitle(self , title):
+        self.title = title
+    def setBacklog(self , backlig):
+        self.__Backlog = backlig
+    def setTodo(self , todo):
+        self.__Todo = todo
+    def setDoing(self , doing):
+        self.__Doing = doing
+    def setDone(self , done):
+        self.__Done = done
+    def setArchived(self , archived):
+        self.__Archived = archived
+
+    #Getter
+    def getTitle():
+        return self.title
+    def getBachlog():
+        return self.__Backlog
+    def getTodo():
+        return self.__Todo
+    def getDoing():
+        return self.__Doing
+    def getDone():
+        return self.__Done
+    def getArchived():
+        return self.__Archived
+
+    
+    #def setStatus(self , status):
+    #    self.status = status
+    #def getStatus(self):
+    #    return self.status
 
 class Task:
     def __init__(self, title, assignee, status='Backlog', priority='LOW'):
