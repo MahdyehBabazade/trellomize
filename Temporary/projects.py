@@ -10,7 +10,6 @@ class Project:
         self.__Done = Done
         self.__Archived = Archived
         self.__leader = leader
-        self.__collabrators = collabrators
 
     #Setter
     def setTitle(self , title):
@@ -27,8 +26,6 @@ class Project:
         self.__Archived = archived
     def setLeader(self , leader):
         self.__leader = leader
-    def setCollabrators(self , collabrators):
-        self.__collabrators = collabrators
 
     #Getter
     def getTitle(self):
@@ -45,8 +42,6 @@ class Project:
         return self.__Archived
     def grtLeader(self):
         return self.leader
-    def getCollabrator(self):
-        return self.collabrators
 
     #other
     def add_collabrator(self , collabrator):
