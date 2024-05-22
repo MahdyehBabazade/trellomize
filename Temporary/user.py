@@ -44,7 +44,7 @@ class SignUp:
         with open(filename, "w") as f:
             json.dump(user.__dict__, f, indent=4)
 
-    def email_isvalid(email):
+    def email_isvalid(self, email):
         output = False
         try:
             if not (email.endswith('@gmail.com') or email.endswith('@yahoo.com')):
@@ -55,7 +55,7 @@ class SignUp:
             raise ValueError(str(error))
         return output
 
-    def username_isvalid(username):
+    def username_isvalid(self, username):
         output = False
         try:
             if len(username) == 0:
@@ -66,7 +66,7 @@ class SignUp:
             raise ValueError(str(error))
         return output
 
-    def password_isvalid(password):    
+    def password_isvalid(self, password):    
         output = False
         try:
             if len(password) < 8:
@@ -77,13 +77,13 @@ class SignUp:
             raise ValueError(str(error)) 
         return output
 
-    def sign_up(email, username, password):
+    def sign_up(self, email, username, password):
         user = User(email, username, password)
         SignUp.save_to_file(user)
 
 class Login:
 
-    def correct_password(email , password):
+    def correct_password(self, email , password):
         directory = "AllFiles\\Users"
         filename = os.path.join(directory, f"{email}.json")
         with open(filename, 'r') as file:
@@ -96,25 +96,26 @@ class Login:
                 raise KeyError(str(error))
             return hashing(password) == my_password
 
-    def correct_email(email): 
+    def correct_email(self, email): 
         directory = "AllFiles\\Users"
         filename = os.path.join(directory, f"{email}.json")
         if not os.path.exists(filename):
             return False
         return True
 
-    def load(email, password):
+    def load(self, email, password):
         directory = "AllFiles\\Users"
         filename = os.path.join(directory, f"{email}.json")
         with open(filename, 'r') as file:
             data = json.load(file)
+            login_instance = Login()
             try:
-                if Login.correct_email(email):
-                    if Login.correct_password(email, password):
+                if login_instance.correct_email(email):
+                    if login_instance.correct_password(email, password):
                         return True
                     else:
-                        raise Exception('Incorrect Password!')
+                        raise ValueError('Incorrect Password!')
                 else:
-                    raise Exception('User not found!')
-            except Exception as error:
-                raise Exception(str(error))
+                    raise ValueError('User not found!')
+            except ValueError as error:
+                raise ValueError(str(error))

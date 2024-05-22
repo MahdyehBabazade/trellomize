@@ -40,15 +40,15 @@ class Project:
 
     # Other
     def addTask(self , Task):
-        if Task.getStatus == Status.BACKLOG.value:
+        if Task.getStatus() == Status.BACKLOG.value:
             self.__Backlog.append(Task)
-        elif Task.getStatus == Status.TODO.value:
+        elif Task.getStatus() == Status.TODO.value:
             self.__Todo.append(Task)
-        elif Task.getStatus == Status.DOING.value:
+        elif Task.getStatus() == Status.DOING.value:
             self.__Doing.append(Task)
-        elif Task.getStatus == Status.DONE.value:
+        elif Task.getStatus() == Status.DONE.value:
             self.__Done.append(Task)
-        elif Task.getStatus == Status.ARCHIVED.value:
+        elif Task.getStatus() == Status.ARCHIVED.value:
             self.__Archived.append(Task)
     def add_collabrator(self , collabrator):
         self.__collabrators.append(collabrator)
@@ -74,9 +74,8 @@ class Priority(Enum):
     CRITICAL = 4
 
 class Task:
-    def __init__(self, title, assignee, status=Status.BACKLOG.value, priority=Priority.LOW.value):
+    def __init__(self, title, status=Status.BACKLOG.value, priority=Priority.LOW.value):
         self.__title = title
-        self.__assignees = assignee
         self.__status = status # work with value
         self.__priority = priority
         self.__taskID = uuid.uuid1()
@@ -86,8 +85,6 @@ class Task:
     # Setters
     def setTitle(self, title):
         self.__title = title
-    def setAssignees(self, assignees):
-        self.__assignees = assignees
     def setStatus(self, status):
         self.__status = status #status is value
     def setPriority(self, priority):
