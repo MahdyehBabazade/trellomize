@@ -13,7 +13,7 @@ def choose_by_key(items):
         os.system('cls')
         for i in range(len(items)):
             if i == current_pos:
-                console.print(Panel(items[i]), style="green")
+                console.print(Panel(items[i]), style="purple")
             else:
                 console.print(Panel(items[i], border_style="bold purple4"))
         console.print("Press 'q' to quit.", style="grey69")
@@ -61,12 +61,12 @@ def signup_page():
 
     os.system('cls')
     console = Console()
-
+    signup_sys = user.Signup()
     console.print("[bold purple4]Enter you email: [/]")
     email = input()
     while  True:
         try:
-            if user.email_isvalid(email):
+            if signup_sys.email_isvalid(email):
                 break
         except ValueError as error:
             os.system('cls')
@@ -78,7 +78,7 @@ def signup_page():
     username = input()
     while True:
         try:
-            if user.username_isvalid(username):
+            if signup_sys.username_isvalid(username):
                 break
         except ValueError as error:
             os.system('cls')
@@ -92,7 +92,7 @@ def signup_page():
     password = input()
     while  True:
         try:
-            if user.password_isvalid(password):
+            if signup_sys.password_isvalid(password):
                 break      
         except ValueError as error:
             os.system('cls')
@@ -104,27 +104,31 @@ def signup_page():
             console.print("[bold purple4]Enter you password: [/]")
             password = input()
         
-    user.sign_up(email, username, password)
+    signup_sys.sign_up(email, username, password)
 
 def login_page():
     console = Console()
+    login_sys = user.Login()
     os.system('cls')
     console.print("Enter your email: ", style="bold purple4")
-    username = input()
+    email = input()
     console.print("[bold purple4]Enter your password: [/]")
     password = input()
 
     while True:
         try:
-            if user.login(email, password):
+            if login_sys.load(email, password):
                 console.print('Successfully logged in!')
+                your_profile_page()
                 break
         except Exception as error:
             console.print(str(error))
             console.print("Try again: ")
             console.print("[bold purple4]Enter your email: [/]")
-            username = input()
+            email = input()
             console.print("[bold purple4]Enter your password: [/]")
             password = input()
 
+def your_profile_page():
+    os.system('cls')
 menu()
