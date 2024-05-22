@@ -2,6 +2,10 @@ from rich.console import Console
 from rich.panel  import Panel
 import os, sys, msvcrt
 
+def prompt():
+    print('Press any key to continue.')
+    key = msvcrt.getch()
+
 def press_esc():
     console = Console()
     current_pos = 0
@@ -31,8 +35,8 @@ def choose_by_key(description="", **kwargs):
     while True:
         os.system('cls')
         console.print(description, justify="center")
-        for first, second in kwargs.items():
-            if kwargs[first] == kwargs[current_pos]:
+        for index, (first, second) in enumerate(kwargs.items()):
+            if index == current_pos:
                 console.print(Panel(second, title=first), style="purple")
             else:
                 console.print(Panel(second, title=first, border_style="bold purple4"))
@@ -63,7 +67,7 @@ def choose_by_key(description="", **kwargs):
             break
     return choice
 
-def choose_by_key(*args, description=""):   # Overloaded Function
+def choose_by_key(description="" , *args):   # Overloaded Function
     console = Console()
     current_pos = 0
     choice = 0

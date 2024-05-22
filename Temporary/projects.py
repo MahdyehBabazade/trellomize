@@ -6,19 +6,22 @@ import json
 from enum import Enum
 
 class Project:
-    def __init__(self, title , leader):
+    def __init__(self, title , ProjectID , leader):
         self.__title = title
         self.__Backlog = []
         self.__Todo = []
         self.__Doing = []
         self.__Done = []
         self.__Archived = []
+        self.__ProjectID = ProjectID
         self.__leader = leader
         self.__collabrators = leader
 
     # Setters
     def setTitle(self , title):
         self.__title = title
+    def setProjectId(self , id):
+        self.__ProjectID = id
     def setCollabrator(self , collabrator):
         self.__collabrators.append(collabrator)
 

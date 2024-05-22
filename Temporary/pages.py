@@ -4,6 +4,7 @@ from rich.panel import Panel
 import user as userlib
 import projects as pr
 from rich.prompt import Prompt, Confirm
+import os
 
 def menu():
     introduction = "\n[bold italic]TRELLOMIZE[/]\n[grey70]Transform your project management experience with our innovative platform,\noffering streamlined coordination, real-time updates, and effective task management.[/]\n"
@@ -104,7 +105,7 @@ def your_account_page(user):
     elif choice == 3:
         pass
     elif choice == 4:
-        logout_page()
+        logout_page(user.get_email())
         
 def new_project_page(user):
     console = Console()
@@ -121,8 +122,11 @@ def load_projects_page(): #
 def edit_info_page():
     pass
 
-def logout_page(): #
-    pass
+def logout_page(email): 
+    filename = os.path.join("AllFiles\\Users", f"{email}.json")
+    os.remove(filename)
+    GF.prompt()
+    
 
 def task_page_by_status(project, status=pr.Status.BACKLOG.value):
     os.system('cls')

@@ -22,6 +22,9 @@ class User:
     def set_email(self, email):
         self.email = email
     
+    def get_email(self):
+        return self.email
+        
     def delete_account(self, username):
         filename = f"AllFiles.Users/{username}.json"
         if os.path.exists(filename):
