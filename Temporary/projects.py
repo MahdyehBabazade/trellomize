@@ -6,34 +6,25 @@ import json
 from enum import Enum
 
 class Project:
-    def __init__(self, title , Backlog , Todo , Doing , Done, Archived , leader , collabrators):
-        self.title = title
-        self.__Backlog = Backlog
-        self.__Todo = Todo
-        self.__Doing = Doing
-        self.__Done = Done
-        self.__Archived = Archived
+    def __init__(self, title , leader):
+        self.__title = title
+        self.__Backlog = []
+        self.__Todo = []
+        self.__Doing = []
+        self.__Done = []
+        self.__Archived = []
         self.__leader = leader
+        self.__collabrators = leader
 
     # Setters
     def setTitle(self , title):
-        self.title = title
-    def setBacklog(self , backlig):
-        self.__Backlog = backlig
-    def setTodo(self , todo):
-        self.__Todo = todo
-    def setDoing(self , doing):
-        self.__Doing = doing
-    def setDone(self , done):
-        self.__Done = done
-    def setArchived(self , archived):
-        self.__Archived = archived
-    def setLeader(self , leader):
-        self.__leader = leader
+        self.__title = title
+    def setCollabrator(self , collabrator):
+        self.__collabrators.append(collabrator)
 
     # Getters
     def getTitle(self):
-        return self.title
+        return self.__title
     def getBacklog(self):
         return self.__Backlog
     def getTodo(self):
@@ -48,6 +39,17 @@ class Project:
         return self.__leader
 
     # Other
+    def addTask(self , Task):
+        if Task.getStatus == Status.BACKLOG.value:
+            self.__Backlog.append(Task)
+        elif Task.getStatus == Status.TODO.value:
+            self.__Todo.append(Task)
+        elif Task.getStatus == Status.DOING.value:
+            self.__Doing.append(Task)
+        elif Task.getStatus == Status.DONE.value:
+            self.__Done.append(Task)
+        elif Task.getStatus == Status.ARCHIVED.value:
+            self.__Archived.append(Task)
     def add_collabrator(self , collabrator):
         self.__collabrators.append(collabrator)
     
@@ -75,7 +77,7 @@ class Task:
     def __init__(self, title, assignee, status=Status.BACKLOG.value, priority=Priority.LOW.value):
         self.__title = title
         self.__assignees = assignee
-        self.__status = status
+        self.__status = status # work with value
         self.__priority = priority
         self.__taskID = uuid.uuid1()
         self.__endtime = datetime.datetime.now()+datetime.timedelta(hours=24)
@@ -87,7 +89,7 @@ class Task:
     def setAssignees(self, assignees):
         self.__assignees = assignees
     def setStatus(self, status):
-        self.__status = status
+        self.__status = status #status is value
     def setPriority(self, priority):
         self.__priority = priority
     def setDescription(self, description):
@@ -98,7 +100,7 @@ class Task:
     # Getters
     def getTitle(self):
         return self.__title
-    def getStatus(self):
+    def getStatus(self): #return value
         return self.__status
     def getAssignees(self):
         return self.__assignees

@@ -133,7 +133,12 @@ def login_page():
         try:
             if login_sys.load(email, password):
                 console.print('Successfully logged in!')
-                your_account_page()
+                filename = os.path.join("AllFiles\\Users", f"{email}.json")
+                with open(filename, 'r') as file:
+                    data = json.load(file)
+                    username = data.get("password")
+                    user = user.User(email , username , password)
+                    your_account_page(user)
                 break
         except Exception as error:
             console.print(str(error))
@@ -143,7 +148,7 @@ def login_page():
             console.print("[bold purple4]Enter your password: [/]")
             password = input()
 
-def your_account_page():
+def your_account_page(user):
     os.system('cls')
     console = Console()
     console.print("I want to ...")
@@ -165,13 +170,13 @@ def new_project_page():
     title = input()
 
 
-def load_projects():
+def load_projects(): #
     pass
 
 def edit_info():
     pass
 
-def logout():
+def logout(): #
     pass
 
 menu()
