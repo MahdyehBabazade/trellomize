@@ -141,4 +141,8 @@ def task_page_by_status(project, status=pr.Status.BACKLOG.value):
         task = pr.Task(title, status, priority)
         if want_to_add_assignee:
             assignee = Prompt.ask('Choose the assignees: ')
-            choice = GF.normal_choose(project.getCollaborators())
+            collaborators = [collab for collab in project.getCollaborators()]
+            choice = GF.normal_choose(collaborators)
+            project.addCollaborator(choice)
+            
+
