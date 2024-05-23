@@ -46,12 +46,12 @@ class User:
         with open(filename, "w") as f:
             json.dump(self.to_dict(), f, indent=4)
 
-    def delete_account(self, username):
-        filename = f"AllFiles.Users/{username}.json"
+    def delete_account(self):
+        filename = f"AllFiles.Users/{self.__email}.json"
         if os.path.exists(filename):
             os.remove(filename)
         else:
-            raise FileNotFoundError(f"User {username} does not exist.")
+            raise FileNotFoundError(f"User {self.__email} does not exist.")
     
     def build_project(self):
         pass

@@ -122,7 +122,7 @@ def login_page():
 def your_account_page(user):
     os.system('cls')
     console = Console()
-    choice = GF.choose_by_key("[bold italic white]\nI want to ...\n", "[grey70]create a new project.", "[grey70]see my projects.", "[grey70]edit my profile.", "[grey70]back", "[grey70]logout")
+    choice = GF.choose_by_key("[bold italic white]\nI want to ...\n", "[grey70]create a new project.", "[grey70]see my projects.", "[grey70]edit my profile.", "[grey70]back", "[grey70]logout" , "[grey70]delete acount")
     if choice == 0:
         new_project_page(user)
     elif choice == 1:
@@ -132,7 +132,9 @@ def your_account_page(user):
     elif choice == 3:
         pass
     elif choice == 4:
-        logout_page(user.getEmail())
+        logout_page(user)
+    elif choice == 5:
+        user.delete_account()
         
 def new_project_page(user):
     os.system('cls')
@@ -151,8 +153,14 @@ def load_projects_page(): #
 def setting():
     pass
 
-def logout_page(email): 
-    pass
+def logout_page(user): 
+    choice = GF.choose_by_key('Are you sure?' , 'Yes' , 'No')
+    if choice == 0:
+        print('You log out successfully.')
+        GF.prompt()
+        menu()
+    elif choice == 1:
+        your_account_page(user)
 
 def task_page_by_status(project, status=pr.Status.BACKLOG.value):
     os.system('cls')
