@@ -47,7 +47,7 @@ class User:
             json.dump(self.to_dict(), f, indent=4)
 
     def delete_account(self):
-        filename = f"AllFiles.Users/{self.__email}.json"
+        filename = f"AllFiles\\Users/{self.__email}.json"
         if os.path.exists(filename):
             os.remove(filename)
         else:
