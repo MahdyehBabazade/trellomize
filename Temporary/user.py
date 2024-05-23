@@ -9,22 +9,43 @@ def hashing(password):
 
 class User:
     def __init__(self, email, username, password):
-        self.email = email
-        self.username = username
-        self.password = hashing(password)
-        
-    def set_username(self, username):
-        self.username = username
+        self.__email = email
+        self.__username = username
+        self.__password = hashing(password)
+
+    # Setters   
+    def setUsername(self, username):
+        self.__username = username
+    def setPassword(self, password):
+        self.__password = hashing(password)
+    def setEmail(self, email):
+        self.__email = email
+
+    # Getters
+    def getEmail(self):
+        return self.__email
+    def getUsername(self):
+        return self.__username
+    def getPassword(self):
+        return self.__password 
+
+    # Others
+    def to_dict(self):
+        return {
+            "email": self.__email,
+            "username": self.__username,
+            "password": self.__password
+        }
     
-    def set_password(self, password):
-        self.password = hashing(password)
-    
-    def set_email(self, email):
-        self.email = email
-    
-    def get_email(self):
-        return self.email
-        
+    def save_to_file(self):
+        directory = "AllFiles\\Users"
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+        filename = os.path.join(directory, f"{self.__email}.json")
+        with open(filename, "w") as f:
+            json.dump(self.to_dict(), f, indent=4)
+
     def delete_account(self, username):
         filename = f"AllFiles.Users/{username}.json"
         if os.path.exists(filename):
@@ -38,87 +59,54 @@ class User:
 
 class SignUp:
 
-    def save_to_file(user):
-        directory = "AllFiles\\Users"
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-
-        filename = os.path.join(directory, f"{user.email}.json")
-        with open(filename, "w") as f:
-            json.dump(user.__dict__, f, indent=4)
-
     def email_isvalid(self, email):
-        output = False
-        try:
-            if not (email.endswith('@gmail.com') or email.endswith('@yahoo.com')):
-                raise ValueError('Invalid email!')
-            else:
-                output = True
-        except ValueError as error:
-            raise ValueError(str(error))
-        return output
+        if not (email.endswith('@gmail.com') or email.endswith('@yahoo.com')):
+            raise ValueError('Invalid email!')
+        
+        directory = "AllFiles/Users"
+        filename = os.path.join(directory, f"{email}.json")
+        if os.path.exists(filename):
+            raise FileExistsError('Email Already Exists!! Try Another One.')
+
+        return True
 
     def username_isvalid(self, username):
-        output = False
-        try:
-            if len(username) == 0:
-                raise ValueError('Invalid username')
-            else:
-                output = True
-        except ValueError as error:
-            raise ValueError(str(error))
-        return output
+        if len(username) == 0:
+            raise ValueError('Invalid username')
+        return True
 
     def password_isvalid(self, password):    
-        output = False
-        try:
-            if len(password) < 8:
-                raise ValueError('Password must have at least 8 characters!')
-            else:
-                output = True
-        except ValueError as error:
-            raise ValueError(str(error)) 
-        return output
+        if len(password) < 8:
+            raise ValueError('Password must have at least 8 characters!')
+        return True
 
     def sign_up(self, email, username, password):
         user = User(email, username, password)
-        SignUp.save_to_file(user)
+        user.save_to_file()
 
 class Login:
 
-    def correct_password(self, email , password):
-        directory = "AllFiles\\Users"
+    def correct_password(self, email, password):
+        if len(password) < 8:
+            raise ValueError('Password must have at least 8 characters!')
+
+        directory = "AllFiles/Users"
         filename = os.path.join(directory, f"{email}.json")
         with open(filename, 'r') as file:
             data = json.load(file)
             my_password = data.get("password")
-            try:
-                if not my_password:
-                    raise KeyError("Password not found in user data.")
-            except KeyError as error:
-                raise KeyError(str(error))
-            return hashing(password) == my_password
+            if my_password != hashing(password):
+                raise ValueError("Incorrect password.")
+        return True
 
     def correct_email(self, email): 
-        directory = "AllFiles\\Users"
+        directory = "AllFiles/Users"
         filename = os.path.join(directory, f"{email}.json")
         if not os.path.exists(filename):
             return False
         return True
 
     def load(self, email, password):
-        directory = "AllFiles\\Users"
-        filename = os.path.join(directory, f"{email}.json")
-        with open(filename, 'r') as file:
-            data = json.load(file)
-            login_instance = Login()
-            try:
-                if login_instance.correct_email(email):
-                    if login_instance.correct_password(email, password):
-                        return True
-                    else:
-                        raise ValueError('Incorrect Password!')
-                else:
-                    raise ValueError('User not found!')
-            except ValueError as error:
-                raise ValueError(str(error))
+        if self.correct_email(email) and self.correct_password(email, password):
+            return True
+        return False

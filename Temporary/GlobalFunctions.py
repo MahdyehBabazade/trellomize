@@ -28,7 +28,7 @@ def press_esc():
             break
     return choice
 
-def choose_by_key(description="", **kwargs):
+def choose_by_key_with_kwargs(description="", **kwargs):
     console = Console()
     current_pos = 0
     choice = 0
@@ -67,7 +67,7 @@ def choose_by_key(description="", **kwargs):
             break
     return choice
 
-def choose_by_key(description="" , *args):   # Overloaded Function
+def choose_by_key(description="", *args):   # Overloaded Function
     console = Console()
     current_pos = 0
     choice = 0
