@@ -40,9 +40,7 @@ class Project:
         directory = "AllFiles/Users"
         if not os.path.exists(directory):
             os.makedirs(directory)
-
         filename = os.path.join(directory, f"{user.getEmail()}.json")
-        
         try:
             with open(filename, "r") as f:
                 data = json.load(f)
@@ -53,8 +51,7 @@ class Project:
                 "password": user.getPassword(),
                 "projects": {}
             }
-
-        data["projects"][self.__ProjectID] = {
+        data["projects"] = {  #this was error
             'title': self.__title,
             'ProjectID': self.__ProjectID,
             'leader': self.__leader.to_dict(),
@@ -135,7 +132,7 @@ class Task:
             'comments': self.__comments
         }
 
-def load_from_file(project_id, user):
+def load_from_file(project_id, user):  #maybe it has error too
     directory = "AllFiles/Users"
     filename = os.path.join(directory, f"{user.getEmail()}.json")
     if os.path.exists(filename):

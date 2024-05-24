@@ -16,7 +16,6 @@ def menu():
         
 
 def signup_page():
-
     os.system('cls')
     console = Console()
     signup_sys = userlib.SignUp()
@@ -82,11 +81,11 @@ def login_page():
     console.print("[bold purple4]Enter your password: [/]")
     password = input()
 
-    while True:
+    while True: #this one do not work if email is not vallid
         try:
             if login_sys.load(email, password):
                 console.print('Successfully logged in!')
-                filename = os.path.join("AllFiles\\Users", f"{email}.json")
+                filename = os.path.join("AllFiles/Users", f"{email}.json") #change \\ to /
                 with open(filename, 'r') as file:
                     data = json.load(file)
                     username = data.get("username")
@@ -246,8 +245,9 @@ def logout_page(user):
 def task_page_by_status(project, status=pr.Status.BACKLOG.value):
     os.system('cls')
     console = Console()
-    console.print(pr.Status(status), style="bold itatlic white", justify="center")
-    choice = GF.choose_by_key(Create = f"[grey70]Add a task in {pr.Status(status)}s")
+    console.print(pr.Status(status), style="bold italic white", justify="center")
+    #choice = GF.choose_by_key(Create = f"[grey70]Add a task in {pr.Status(status)}s")
+    choice = GF.choose_by_key("" , f"[grey70]Add a task in {pr.Status(status)}s" , f"see tasks in {pr.Status(status)}s")
     if choice == 0:
         os.system('cls')
         title = Prompt.ask('Enter a title for you task')

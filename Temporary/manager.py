@@ -31,7 +31,7 @@ def manager_signup(username, password):
     if not os.path.exists(directory):
         os.makedirs(directory)
 
-    filename = os.path.join(directory, f"{admin.getUsername}.json")
+    filename = os.path.join(directory, f"{admin.getUsername}.json")  #files works with email not username
     with open(filename, "w") as f:
             json.dump(admin.__dict__, f, indent=4)
     
