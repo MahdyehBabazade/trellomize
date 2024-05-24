@@ -1,6 +1,7 @@
 import json
 import hashlib
 import os
+from rich.console import Console
 
 def hashing(password):
         sha256 = hashlib.sha256()
@@ -47,11 +48,29 @@ class User:
             json.dump(self.to_dict(), f, indent=4)
 
     def delete_account(self):
-        filename = f"AllFiles/Users/{self.__email}.json"
+        console = Console()
+        directory = "AllFiles/Users"
+        filename = os.path.join(directory, f"{self.__email}.json")
         if os.path.exists(filename):
-            os.remove(filename)
+            for attempt in range(5):
+                try:
+                    os.remove(self.file_path)
+                    console.print(f"File for {self.__email} deleted successfully.")
+                    return
+                except PermissionError as e:
+                    console.print(f"Attempt {attempt + 1}: {e}. Retrying ...")
+                except Exception as e:
+                    console.print(f"An unexpected error occurred: {e}")
+                    return
+            console.print(f"Failed to delete file for {self.__email} after multiple attempts.")
         else:
-            raise FileNotFoundError(f"User {self.__email} does not exist.")
+            console.print(f"File for {self.__email} does not exist.")
+
+
+        
+        
+        os.remove(filename)
+        pg.menu()
     
     def build_project(self):
         pass
@@ -100,10 +119,12 @@ class Login:
         return True
 
     def correct_email(self, email): 
+        if not (email.endswith('@gmail.com') or email.endswith('@yahoo.com')):
+            raise ValueError('Invalid email!')
         directory = "AllFiles/Users"
         filename = os.path.join(directory, f"{email}.json")
         if not os.path.exists(filename):
-            return False
+            raise FileExistsError("This email does not exist.")
         return True
 
     def load(self, email, password):

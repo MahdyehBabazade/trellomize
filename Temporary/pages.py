@@ -78,50 +78,49 @@ def login_page():
     console.print('[bold italic white]LOGIN[/]\nif you already have an account', justify="center")
     console.print("Enter your email: ", style="bold purple4")
     email = input()
-    console.print("[bold purple4]Enter your password: [/]")
-    password = input()
-
-    while True: #this one do not work if email is not vallid
+    while  True:
         try:
-            if login_sys.load(email, password):
-                console.print('Successfully logged in!')
-                filename = os.path.join("AllFiles/Users", f"{email}.json") #change \\ to /
-                with open(filename, 'r') as file:
-                    data = json.load(file)
-                    username = data.get("username")
-                    user = userlib.User(email , username , password)
-                    your_account_page(user)
+            if login_sys.correct_email(email):
                 break
         except ValueError as error:
             os.system('cls')
-            console.print(str(error)+"\n", style="bold red")
-            console.print("Try again: ")
-            console.print("[bold purple4]Enter your email: [/]")
+            console.print(error, style="red")
+            console.print("[bold purple4]Enter you email: [/]")
             email = input()
-            console.print("[bold purple4]Enter your password: [/]")
-            password = input()
-        except FileNotFoundError as error:
+        except FileExistsError as error:
             os.system('cls')
-            console.print(str(error)+"\n", style="bold red")
-            console.print("Try again: ")
-            console.print("[bold purple4]Enter your email: [/]")
+            console.print(error, style="red")
+            console.print("[bold purple4]Enter you email: [/]")
             email = input()
-            console.print("[bold purple4]Enter your password: [/]")
-            password = input()
-        except KeyError as error:
+    console.print("[bold purple4]Enter your password: [/]")
+    password = input()
+    while  True:
+        try:
+            if login_sys.correct_password(email , password):
+                break      
+        except ValueError as error:
             os.system('cls')
-            console.print(str(error)+"\n", style="bold red")
-            console.print("Try again: ")
-            console.print("[bold purple4]Enter your email: [/]")
-            email = input()
-            console.print("[bold purple4]Enter your password: [/]")
+            console.print(error, style="red")
+            console.print("[bold purple4]Enter you email: [/]")
+            console.print(email)
+            console.print("[bold purple4]Enter you username: [/]")
+            console.print(username)
+            console.print("[bold purple4]Enter you password: [/]")
             password = input()
+            console.print('Successfully logged in!')
+
+    filename = os.path.join("AllFiles/Users", f"{email}.json") #change \\ to /
+    with open(filename, 'r') as file:
+        data = json.load(file)
+        username = data.get("username")
+        user = userlib.User(email , username , password)
+        your_account_page(user)
             
 
 def your_account_page(user):
     os.system('cls')
     console = Console()
-    choice = GF.choose_by_key("[bold italic white]\nI want to ...\n", "[grey70]create a new project.", "[grey70]see my projects.", "[grey70]edit my profile.", "[grey70]back", "[grey70]logout")
+    choice = GF.choose_by_key("[bold italic white]\nI want to ...\n", "create a new project.", "see my projects.", "edit my profile.", "back", "logout")
     if choice == 0:
         new_project_page(user)
     elif choice == 1:
@@ -149,7 +148,8 @@ def load_projects_page(): #
     pass
 
 def setting(user):
-    choice = GF.choose_by_key("What do you want to do?" , "Edit my profile" , "delete acount")
+    choice = GF.choose_by_key("What do you want to do?" , "Edit my profile" , "delete acount" , "Back")
+
     if choice == 0:
         os.system('cls')
         console = Console()
@@ -159,19 +159,14 @@ def setting(user):
             try:
                 if user.getPassword() == userlib.hashing(password):
                     break
-            except ValueError as error:
+            except:
                 os.system('cls')
-                console.print(str(error)+"\n", style="bold red")
+                console.print("Invalid password"+"\n", style="bold red")
                 console.print("Try again: ")
                 console.print("[bold purple4]Enter your password: [/]")
                 password = input()
-            except KeyError as error:
-                os.system('cls')
-                console.print(str(error)+"\n", style="bold red")
-                console.print("Try again: ")
-                console.print("[bold purple4]Enter your password: [/]")
-                password = input()
-        choice = GF.choose_by_key('What do you want to change?' , 'My username' , 'My password')
+
+        choice = GF.choose_by_key('What do you want to change?' , 'My username' , 'My password' , 'Back')
         if choice == 0:
             os.system('cls')
             console.print("[bold purple4]Enter your new username.")
@@ -183,7 +178,9 @@ def setting(user):
             with open(filename, 'w') as file:
                 json.dump(data, file, indent=4)
             os.system('cls')
-            consol.print("Your username has been changed successfully!") 
+            console.print("\n[bold purple4]Your username has been changed successfully!")
+            GF.prompt()
+            setting(user)
         elif choice == 1:
             os.system('cls')
             console.print("[bold purple4]Enter your new password.")
@@ -195,41 +192,58 @@ def setting(user):
             with open(filename, 'w') as file:
                 json.dump(data, file, indent=4) 
             os.system('cls')
-            consol.print("Your password has been changed successfully!")            
+            console.print("\n[bold purple4]Your password has been changed successfully!")
+            GF.prompt()
+            setting(user)
+        elif choice == 2:
+            os.system('cls')
+            setting(user)
+
     elif choice == 1:
         os.system('cls')
         console = Console()
         choice = GF.choose_by_key('Are you sure?' , 'Yes' , 'No')
         if choice == 0:
             os.system('cls')
+            login_sys = userlib.Login()
             console.print("[bold purple4]Enter your email: [/]")
             email = input()
-            console.print("[bold purple4]Enter your password: [/]")
-            password = input()
             while True:
                 try:
-                    if userlib.hashing(password) == user.getPassword():
+                    if login_sys.correct_email(email):
                         break
                 except ValueError as error:
                     os.system('cls')
-                    console.print(str(error)+"\n", style="bold red")
-                    console.print("Try again: ")
-                    console.print("[bold purple4]Enter your email: [/]")
+                    console.print(error, style="red")
+                    console.print("[bold purple4]Enter you email: [/]")
                     email = input()
-                    console.print("[bold purple4]Enter your password: [/]")
-                    password = input()
-                except KeyError as error:
+                except FileExistsError as error:
                     os.system('cls')
-                    console.print(str(error)+"\n", style="bold red")
-                    console.print("Try again: ")
-                    console.print("[bold purple4]Enter your email: [/]")
+                    console.print(error, style="red")
+                    console.print("[bold purple4]Enter you email: [/]")
                     email = input()
-                    console.print("[bold purple4]Enter your password: [/]")
+            console.print("[bold purple4]Enter your password: [/]") 
+            password = input()
+            while True:
+                if userlib.hashing(password) == user.getPassword():
+                    break      
+                else:
+                    os.system('cls')
+                    console.print("Invalid password", style="red")
+                    console.print("[bold purple4]Enter you email: [/]")
+                    console.print(email)
+                    console.print("[bold purple4]Enter you password: [/]")
                     password = input()
+            console.print("You have delete your acount successfully!")
             user.delete_account()
-            console.print("you delete account successfully!")
+            menu() 
         elif choice == 1:
+            os.system('cls')
             setting(user)
+
+    elif choice == 2:
+        os.system('cls')
+        your_account_page(user)
 
 
 def logout_page(user): 
@@ -258,4 +272,5 @@ def task_page_by_status(project, status=pr.Status.BACKLOG.value):
             assignee = Prompt.ask('Choose the assignees: ')
             collaborators = [collab for collab in project.getCollaborators()]
             choice = GF.normal_choose(collaborators)
-            project.addCollaborator(choice)
+            project.setCollaborator(choice)
+            #project.addCollaborator(choice)
