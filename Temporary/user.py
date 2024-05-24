@@ -54,23 +54,22 @@ class User:
         if os.path.exists(filename):
             for attempt in range(5):
                 try:
-                    os.remove(self.file_path)
+                    os.remove(filename)
                     console.print(f"File for {self.__email} deleted successfully.")
                     return
                 except PermissionError as e:
-                    console.print(f"Attempt {attempt + 1}: {e}. Retrying ...")
+                    console.print(f"Attempt {attempt + 1}: {str(e)}. Retrying ...")
                 except Exception as e:
                     console.print(f"An unexpected error occurred: {e}")
                     return
             console.print(f"Failed to delete file for {self.__email} after multiple attempts.")
         else:
             console.print(f"File for {self.__email} does not exist.")
-
-
         
-        
-        os.remove(filename)
-        pg.menu()
+        #if not os.path.exists(filename):
+        #    raise FileNotFoundError('User not found')
+        #os.remove(filename)
+        #pg.menu()
     
     def build_project(self):
         pass

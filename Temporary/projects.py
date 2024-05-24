@@ -5,7 +5,7 @@ import json, user as userlib
 from enum import Enum
 
 class Project:
-    def __init__(self, title, ProjectID, leader):
+    def __init__(self, title, leader, ProjectID = str(uuid.uuid1())):
         self.__title = title
         self.__ProjectID = ProjectID
         self.__leader = leader
@@ -17,8 +17,7 @@ class Project:
         self.__title = title
     def setProjectId(self, id):
         self.__ProjectID = id
-    def setCollaborator(self, collaborator):
-        self.__collaborators.append(collaborator)
+    
 
     # Getters
     def getTitle(self):
@@ -33,25 +32,38 @@ class Project:
         return self.__collaborators
 
     # Other
-    def addTask(self, task):
+    def addTask(self, task, collaborator):
         self.__tasks.append(task)
+        self.save_to_file(collaborator)
+
+    def addCollaborator(self, collaborator):
+        self.__collaborators.append(collaborator)
+
+    def to_dict(self, user):
         
+        return {
+            self.__ProjectID :{
+            'title': self.__title,
+            'ProjectID': self.__ProjectID,
+            'leader': self.__leader.to_dict(),
+            'collaborators': [collaborator.to_dict() for collaborator in self.__collaborators],
+            'tasks': [task.to_dict() for task in self.__tasks]
+            }
+        }
+    
     def save_to_file(self, user):
-        directory = "AllFiles/Users"
+        directory = "AllFiles\\Users"
         if not os.path.exists(directory):
             os.makedirs(directory)
         filename = os.path.join(directory, f"{user.getEmail()}.json")
-        try:
-            with open(filename, "r") as f:
-                data = json.load(f)
-        except FileNotFoundError:
-            data = {
-                "email": user.getEmail(),
-                "username": user.getUsername(),
-                "password": user.getPassword(),
-                "projects": {}
-            }
-        data["projects"] = {  #this was error
+        with open(filename, 'r') as f:
+            data = json.load(f)
+        
+        
+        if 'projects' not in data:
+            data['projects'] = {}
+    
+        data['projects'][self.__ProjectID] = {
             'title': self.__title,
             'ProjectID': self.__ProjectID,
             'leader': self.__leader.to_dict(),
@@ -59,7 +71,7 @@ class Project:
             'tasks': [task.to_dict() for task in self.__tasks]
         }
 
-        with open(filename, "w") as f:
+        with open(filename, 'w') as f:
             json.dump(data, f, indent=4)
 
 class Status(Enum):
@@ -83,6 +95,8 @@ class Task:
         self.__taskID = str(uuid.uuid1())
         self.__endtime = (datetime.datetime.now() + datetime.timedelta(hours=24)).isoformat()
         self.__comments = []
+        self.__assignees = []
+        self.__description = ''
 
     # Setters
     def setTitle(self, title):
@@ -115,36 +129,42 @@ class Task:
         return self.__endtime
     def getDescription(self):
         return self.__description
+    def getAssignees(self):
+        return self.__assignees
 
     # Others
     def addComment(self, comment):
         self.__comments.append(comment)
     def deleteComment(self, comment):
         self.__comments.remove(comment)
-
+    def addAssignee(self, assignee):
+        self.__assignees.append(assignee)
+    
     def to_dict(self):
         return {
             'title': self.__title,
-            'status': self.__status.name,
-            'priority': self.__priority.name,
+            'status': self.__status,
+            'priority': self.__priority,
             'taskID': self.__taskID,
             'endtime': self.__endtime,
-            'comments': self.__comments
+            'comments': self.__comments,
+            'description' : self.__description,
+            'assignees' : [assignee.to_dict() for assignee in self.__assignees]
         }
 
 def load_from_file(project_id, user):  #maybe it has error too
-    directory = "AllFiles/Users"
+    directory = "AllFiles\\Users"
     filename = os.path.join(directory, f"{user.getEmail()}.json")
     if os.path.exists(filename):
         with open(filename, "r") as f:
             data = json.load(f)
             if project_id in data['projects']:
                 project_dict = data['projects'][project_id]
-                leader = userlib.User(**project_dict['leader'])  # Assuming dictionary keys match User constructor arguments
-                project = Project(project_dict['title'], project_dict['ProjectID'], leader)
+                leader = userlib.User(project_dict['leader'])
+                project = Project(project_dict['title'], project_id, leader)
                 for collaborator_dict in project_dict['collaborators']:
-                    collaborator = userlib.User(**collaborator_dict)  # Assuming dictionary keys match User constructor arguments
-                    project.setCollaborator(collaborator)
+                    collaborator = userlib.User(collaborator_dict)
+                    project.addCollaborator(collaborator)
                 for task_dict in project_dict['tasks']:
                     task = Task(task_dict['title'], Status[task_dict['status']], Priority[task_dict['priority']])
                     task.setTaskID(task_dict['taskID'])

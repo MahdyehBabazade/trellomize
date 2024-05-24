@@ -1,13 +1,14 @@
 import os, json, GlobalFunctions as GF
 from rich.console import Console
 import user as userlib
-import projects as pr
+import projects as pr, time
 from rich.prompt import Prompt, Confirm
 import os, uuid
+from rich.text import Text
 
 def menu():
     introduction = "\n[bold italic]TRELLOMIZE[/]\n[grey70]Transform your project management experience with our innovative platform,\noffering streamlined coordination, real-time updates, and effective task management.[/]\n"
-    choice = GF.choose_by_key_with_kwargs(introduction, SIGNUP = "[grey70]for free![/]", LOGIN = "[grey70]if you already have an account[/]")
+    choice = GF.choose_by_key_with_kwargs(Text(introduction, justify="center"), SIGNUP = "[grey70]for free![/]", LOGIN = "[grey70]if you already have an account[/]")
     if choice == 0:
         signup_page()
     elif choice == 1:
@@ -120,35 +121,47 @@ def login_page():
 def your_account_page(user):
     os.system('cls')
     console = Console()
-    choice = GF.choose_by_key("[bold italic white]\nI want to ...\n", "create a new project.", "see my projects.", "edit my profile.", "back", "logout")
+    choice = GF.choose_by_key("[bold italic white]\nI want to ...\n", "create a new project.", "see my projects.", "go to the setting.", "logout from my account.")
     if choice == 0:
         new_project_page(user)
     elif choice == 1:
         load_projects_page()
     elif choice == 2:
         setting(user)
-        #edit_info_page()
     elif choice == 3:
-        pass
-    elif choice == 4:
         logout_page(user)
         
-def new_project_page(user):
+def new_project_page(user): #COMPLETEDDDDDDDD
     os.system('cls')
     console = Console()
-    console.print("[grey70]Enter a title for your project: ", justify="center")
+    console.print(f"{user.getUsername()}")
+    console.print("[grey70]Enter a title for your project: ")
     title = input()
-    myprojectid = str(uuid.uuid1())
-    my_project = pr.Project(title, myprojectid, user)
-    my_project.save_to_file(user)
-    choice = GF.choose_by_key_with_kwargs(title, BACKLOG='', TODO='', DOING='', DONE='', ARCHIVED='')
-    task_page_by_status(my_project, choice+1)
 
-def load_projects_page(): #
+    # Checking the project id
+    console.print('[grey70]Enter a title for your project (optional):')
+    myprojectid = input()
+    directory = "AllFiles\\Users"
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    filename = os.path.join(directory, f"{user.getEmail()}.json")
+    with open(filename, 'r') as f:
+        data = json.load(f)
+    if myprojectid != "" and myprojectid not in data['projects']:
+        my_project = pr.Project(title, user, myprojectid)
+    else:
+        my_project = pr.Project(title, user)
+    ########################################
+
+    my_project.save_to_file(user)
+    choice = GF.choose_by_key_with_kwargs(Text(title, justify="center"), BACKLOG='', TODO='', DOING='', DONE='', ARCHIVED='')
+    task_page_by_status(user, my_project, choice+1)
+
+def load_projects_page(user):
     pass
 
 def setting(user):
-    choice = GF.choose_by_key("What do you want to do?" , "Edit my profile" , "delete acount" , "Back")
+    choice = GF.choose_by_key("What do you want to do?" , "Edit my profile" , "delete account" , "Back")
 
     if choice == 0:
         os.system('cls')
@@ -256,21 +269,35 @@ def logout_page(user):
     elif choice == 1:
         your_account_page(user)
 
-def task_page_by_status(project, status=pr.Status.BACKLOG.value):
+def task_page_by_status(user, project, status=pr.Status.BACKLOG): # COMPLETEDDDDDDDDD
     os.system('cls')
     console = Console()
-    console.print(pr.Status(status), style="bold italic white", justify="center")
-    #choice = GF.choose_by_key(Create = f"[grey70]Add a task in {pr.Status(status)}s")
-    choice = GF.choose_by_key("" , f"[grey70]Add a task in {pr.Status(status)}s" , f"see tasks in {pr.Status(status)}s")
+    console.print(pr.Status(status).name, style="bold italic white", justify="center")
+    choice = GF.choose_by_key_with_kwargs(Create = f"[grey70]Add a task in {pr.Status(status).name}s")
+    #choice = GF.choose_by_key("" , f"[grey70]Add a task in {pr.Status(status)}s" , f"see tasks in {pr.Status(status)}s")
     if choice == 0:
         os.system('cls')
-        title = Prompt.ask('Enter a title for you task')
-        priority = Prompt.ask('How important in this task?', choices=['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'])
-        want_to_add_assignee = Confirm.ask('Wanna add any assignee?')
-        task = pr.Task(title, status, priority)
+        console.print('Enter a title for your task: ')
+        title = input()
+        os.system('cls')
+        choice = GF.choose_by_key('Enter a title for you task:\n'+title+'\nHow important is this task?', 'LOW', 'MEDIUM', 'HIGH', 'CRITICAL', 'DEFAULT')
+        priority = pr.Status(choice+1).value
+        if choice != 4:
+            task = pr.Task(title, status, priority)
+        else:
+            task = pr.Task(title, status)
+
+        want_to_add_assignee = Confirm.ask('Wanna add any assignee?')        
         if want_to_add_assignee:
-            assignee = Prompt.ask('Choose the assignees: ')
-            collaborators = [collab for collab in project.getCollaborators()]
-            choice = GF.normal_choose(collaborators)
-            project.setCollaborator(choice)
-            #project.addCollaborator(choice)
+            console.print('Choose the assignee: ')
+            collaborators = [collab.getUsername() for collab in project.getCollaborators()]
+            choice = GF.choose_by_key('Enter a title for you task:\n'+title+'\nHow important is this task?\nWanna add any assignee?\ny', *collaborators) # Choosing one collaborator as the assignee of the task
+            task.addAssignee(project.getCollaborators()[choice])
+        want_to_add_description = Confirm.ask('Wanna add any description?')
+        if want_to_add_description:
+            description = Prompt.ask('Write a description for your task: ')
+            task.setDescription(description)
+        project.addTask(task, user)
+        console.print(f'Task created in {pr.Status(status).name}.', justify="center")
+        GF.prompt()
+        your_account_page(user)
