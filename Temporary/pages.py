@@ -121,7 +121,7 @@ def your_account_page(user):
     if choice == 0:
         new_project_page(user)
     elif choice == 1:
-        load_projects_page()
+        load_projects_page(user)
     elif choice == 2:
         setting(user)
     elif choice == 3:
@@ -153,7 +153,151 @@ def new_project_page(user): #COMPLETEDDDDDDDD
     task_page_by_status(user, my_project, choice+1)
 
 def load_projects_page(user):
-    pass
+    os.system('cls')
+    console = Console()
+    filename = os.path.join("AllFiles\\Users" , f"{user.getEmail()}.json")
+    with open(filename, 'r') as file:
+        data = json.load(file)
+    title_list = []
+    projectID_list = []
+    for word in data["projects"].values():
+        title_list.append(word["title"])
+        projectID_list.append(word["ProjectID"])
+    title_list.append("Back")
+    while True:
+        choice = GF.choose_by_key("[bold italic white]\nWhich one of your projects..?" , *title_list)
+        if choice == len(title_list) - 1:
+            your_account_page(user)
+            return
+        project_title = title_list[choice]
+        project_id = projectID_list[choice]
+        project = pr.Project(project_title , user , project_id)  #object of project
+        while True:
+            choice2 = GF.choose_by_key(f"[bold italic white]\nWhat do you want to do with {project_title} project?" , "collaborators" , "tasks" , "setting of project" , "Back")
+            if choice2 == 0: #collab
+                os.system('cls')
+                while True:
+                    choice3 =GF.choose_by_key("[bold italic white]\nWhat do you want to do with collaborators?" , "see collaborators" , "add collaborator" , "remove collaborator" , "Back")
+                    if choice3 == 0:
+                        os.system('cls')
+                        colaborators = pr.colaborators_email(user)
+                        console.print("[bold italic white]\nHere is collaborators...")
+                        for i in range(len(colaborators)):
+                            console.print(f"{i}. [bold purple4]{colaborators[i]}")
+                        GF.prompt()
+                    elif choice3 == 1: #add collab
+                        os.system('cls')
+                        console = Console()
+                        login_sys = userlib.Login()
+                        console.print("Enter the collabrators email: ", style="bold purple4")
+                        email = input()
+                        while  True:
+                            try:
+                                if login_sys.correct_email(email):
+                                    break
+                            except ValueError as error:
+                                os.system('cls')
+                                console.print(error, style="red")
+                                console.print("[bold purple4]Enter the email: [/]")
+                                email = input()
+                            except FileExistsError as error:
+                                os.system('cls')
+                                console.print(error, style="red")
+                                console.print("[bold purple4]Enter the email: [/]")
+                                email = input()
+                        filename = os.path.join("AllFiles/Users", f"{email}.json")
+                        with open(filename, 'r') as file:
+                            data = json.load(file)
+                        username = data.get("username")
+                        password = data.get("password")
+                        new_collaborator = userlib.User(email , username , password)
+                        project.addCollaborator(new_collaborator)
+                        colaborators = pr.colaborators_email(user)
+                        pr.addCollaborator_to_all_file(*colaborators , new_collaborator)
+                        console.print("[bold purple4]You have successfully added new collaborator")
+                        GF.prompt()
+                    elif choice3 == 2: #remove collab
+                        os.system('cls')
+                        while True:
+                            colaborators = pr.colaborators_email(user)
+                            colaborators.append("Back")
+                            choice4 = GF.choose_by_key("[bold italic white]\nWitch one of collaborators you want to remove?" , *colaborators)
+                            if choice4 == len(colaborators) - 1:
+                                break
+                            else:
+                                del colaborators[-1]
+                                pr.removeCollaborator_from_all_file(*colaborators , colaborators[choice4])
+                                console.print("[bold purple4]You have successfully added new collaborator")
+                                GF.prompt()
+                    elif choice3 == 3:
+                        break
+            elif choice2 == 1: #task
+                os.system('cls')
+                while True:
+                    choice3 =GF.choose_by_key("[bold italic white]\nWhat do you want to do with tasks?" , "see tasks" , "add task" , "remove task" , "setting of tasks" , "Back")
+                    if choice3 == 0: #see tasks
+
+                        os.system('cls')
+                        tasks = project.getTasks() #return object ?
+                        tasks.append("Back")
+
+                        while True:
+                            choose4 = GF.choose_by_key("[bold italic white]\nHere the tasks of this project , choose between them to see more informations :" , *tasks)
+                            if choose4 == len(tasks) - 1:
+                                break
+                            else:
+                                pass
+                        GF.prompt()  
+
+
+                    elif choice3 == 1: #add task
+                        os.system('cls')
+                        task_title = input("[bold purple4]Enter the task's title :\n")
+                        task = pr.Task(task_title , project)
+                        project.addTask(task , user)
+                    elif choice3 == 2: #remove task
+                        pass
+                    elif choice3 == 3: #setting
+                        os.system('cls')
+                    elif choice3 == 4:
+                        break
+            elif choice2 == 2: #setting
+                os.system('cls')
+                while True:
+                    choice3 = GF.choose_by_key("[bold italic white]\nWhat do you want to do?" , "see information" , "Change information" , "Back")
+                    if choice3 == 0:
+                        os.system('cls')
+                        console.print("[bold italic white]\nHere the project information :")
+                        console.print(f"[bold purple4]Title : {project.getTitle()}")
+                        console.print(f"[bold purple4]Id : {project.getProjectID()}")
+                        leader = project.getLeader()
+                        console.print(f"[bold purple4]Leader : {leader.getEmail()}")
+                        GF.prompt()
+                    elif choice3 == 1:
+                        os.system('cls')
+                        while True:
+                            choice4 = GF.choose_by_key("[bold italic white]\nWhat do you want to change?" , "Title" , "Id" , "Back")
+                            if choice4 == 0:
+                                os.system('cls')
+                                new_title = input("[bold italic white]\nEnter your new title :")
+                                project.changeTitle(new_title)
+                                console.print("[bold purple4]Your title has been successfully changed!")
+                                GF.prompt()
+                            elif choice4 == 1:
+                                os.system('cls')
+                                new_id = input("[bold italic white]\nEnter your new id :")
+                                project.changeProjectId(new_id)
+                                console.print("[bold purple4]Your id has been successfully changed!")
+                                GF.prompt()
+                            elif choice4 == 2:
+                                os.system('cls')
+                                break
+                    elif choice3 == 2:
+                        os.system('cls')
+                        break
+            elif choice2 == 3:
+                os.system('cls')
+                break
 
 def setting(user):
     choice = GF.choose_by_key("What do you want to do?" , "Edit my profile" , "delete account" , "Back")

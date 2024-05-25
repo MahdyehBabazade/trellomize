@@ -15,6 +15,35 @@ def load_the_collaborators_data(*args): # Returns all the collaborators' data in
             data.append(json.load(f))
     return data
 
+def addCollaborator_to_all_file(*username_list , new_collaborator):
+    for email in username_list:
+        filename = os.path.join("AllFiles\\Users" , f"{email}.json")
+        with open(filename, 'r') as file:    
+            data = json.load(file)
+        for word in data["projects"].values():
+            word["collaborators"].append(new_collaborator.to_dict())
+        with open(filename, 'w') as file:
+            json.dump(data, file, indent=4)
+
+def removeCollaborator_from_all_file(*username_list , collaborator):
+    for email in username_list:
+        filename = os.path.join("AllFiles\\Users" , f"{email}.json")
+        with open(filename, 'r') as file:    
+            data = json.load(file)
+        for word in data["projects"].values():
+            word["collaborators"] = [collab for collab in word["collaborators"] if collab != collaborator.to_dict()]
+        with open(filename, 'w') as file:
+            json.dump(data, file, indent=4)
+
+def colaborators_email(user):
+    collabrators = []
+    filename = os.path.join("AllFiles\\Users" , f"{user.getEmail()}.json")
+    with open(filename, 'r') as file:
+        data = json.load(file)
+    for word in data["projects"].values():
+        collabrators.append(word["collaborators"]["email"])
+        return collabrators
+
 class Project:
     def __init__(self, title, leader, ProjectID = str(uuid.uuid1())):
         self.__title = title
