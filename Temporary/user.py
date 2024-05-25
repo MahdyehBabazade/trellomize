@@ -1,4 +1,4 @@
-import json
+import json, GlobalFunctions as GF
 import hashlib
 import os
 from rich.console import Console
@@ -8,19 +8,21 @@ def hashing(password):
         sha256.update(password.encode('utf-8'))
         return sha256.hexdigest()
 
+
+
 class User:
     def __init__(self, email, username, password):
         self.__email = email
         self.__username = username
         self.__password = hashing(password)
-
-    # Setters   
-    def setUsername(self, username):
+    
+    # Change  
+    def changeUsername(self, username):
         self.__username = username
-    def setPassword(self, password):
+        GF.load_the_data(self.__email)['username'] = self.__username
+    def changePassword(self, password):
         self.__password = hashing(password)
-    def setEmail(self, email):
-        self.__email = email
+        GF.load_the_data(self.__email)['password'] = self.__password
 
     # Getters
     def getEmail(self):
@@ -52,17 +54,7 @@ class User:
         directory = "AllFiles/Users"
         filename = os.path.join(directory, f"{self.__email}.json")
         if os.path.exists(filename):
-            for attempt in range(5):
-                try:
-                    os.remove(filename)
-                    console.print(f"File for {self.__email} deleted successfully.")
-                    return
-                except PermissionError as e:
-                    console.print(f"Attempt {attempt + 1}: {str(e)}. Retrying ...")
-                except Exception as e:
-                    console.print(f"An unexpected error occurred: {e}")
-                    return
-            console.print(f"Failed to delete file for {self.__email} after multiple attempts.")
+            os.remove(filename)
         else:
             console.print(f"File for {self.__email} does not exist.")
         
@@ -70,9 +62,6 @@ class User:
         #    raise FileNotFoundError('User not found')
         #os.remove(filename)
         #pg.menu()
-    
-    def build_project(self):
-        pass
 
 
 class SignUp:

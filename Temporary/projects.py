@@ -1,8 +1,19 @@
-import datetime
+import datetime, GlobalFunctions as GF
 import uuid
 import os
 import json, user as userlib
 from enum import Enum
+
+def load_the_collaborators_data(*args): # Returns all the collaborators' data in a list
+    directory = "AllFiles/Users"
+    data = []
+    for collaborator in args:
+        if not os.path.exists(collaborator.getEmail()):
+            os.makedirs(directory)
+        filename = os.path.join(directory, f"{collaborator.getEmail()}.json")
+        with open(filename, "r") as f:
+            data.append(json.load(f))
+    return data
 
 class Project:
     def __init__(self, title, leader, ProjectID = str(uuid.uuid1())):
@@ -13,12 +24,16 @@ class Project:
         self.__tasks = []
 
     # Setters
-    def setTitle(self, title):
+    def changeTitle(self, title):
         self.__title = title
-    def setProjectId(self, id):
-        self.__ProjectID = id
-    
+        for collaborator_data in load_the_collaborators_data(self.__collaborators):
+            collaborator_data['projects'][self.__ProjectID]['title'] = self.__title
 
+    def changeProjectId(self, id):
+        self.__ProjectID = id
+        for collaborator_data in load_the_collaborators_data(self.__collaborators):
+            collaborator_data['projects'][self.__ProjectID]['ProjectID'] = self.__ProjectID
+        
     # Getters
     def getTitle(self):
         return self.__title
@@ -38,6 +53,8 @@ class Project:
 
     def addCollaborator(self, collaborator):
         self.__collaborators.append(collaborator)
+        for collaborator_data in load_the_collaborators_data(self.__collaborators):
+            collaborator_data['projects'][self.__ProjectID]['collaborators'] = [collaborator.to_dict() for collaborator in self.__collaborators]
 
     def to_dict(self, user):
         
@@ -52,18 +69,11 @@ class Project:
         }
     
     def save_to_file(self, user):
-        directory = "AllFiles\\Users"
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-        filename = os.path.join(directory, f"{user.getEmail()}.json")
-        with open(filename, 'r') as f:
-            data = json.load(f)
-        
-        
-        if 'projects' not in data:
-            data['projects'] = {}
+
+        if 'projects' not in GF.load_the_data(user.GetEmail()):
+            GF.load_the_data(user.GetEmail())['projects'] = {}
     
-        data['projects'][self.__ProjectID] = {
+        GF.load_the_data(user.GetEmail())['projects'][self.__ProjectID] = {
             'title': self.__title,
             'ProjectID': self.__ProjectID,
             'leader': self.__leader.to_dict(),
@@ -71,8 +81,9 @@ class Project:
             'tasks': [task.to_dict() for task in self.__tasks]
         }
 
+        filename = os.path.join("AllFiles/Users", f"{user.getEmail()}.json")
         with open(filename, 'w') as f:
-            json.dump(data, f, indent=4)
+            json.dump(GF.load_the_data(user.GetEmail()), f, indent=4)
 
 class Status(Enum):
     BACKLOG = 1
@@ -88,7 +99,7 @@ class Priority(Enum):
     CRITICAL = 4
 
 class Task:
-    def __init__(self, title, status=Status.BACKLOG, priority=Priority.LOW):
+    def __init__(self, title, project, status=Status.BACKLOG.value, priority=Priority.LOW.value):
         self.__title = title
         self.__status = status
         self.__priority = priority
@@ -97,23 +108,36 @@ class Task:
         self.__comments = []
         self.__assignees = []
         self.__description = ''
+        self.__project = project
 
     # Setters
-    def setTitle(self, title):
+    def changeTitle(self, title):
         self.__title = title
-    def setStatus(self, status):
+        for collaborator_data in load_the_collaborators_data(*self.__project.getCollaborators()):
+            collaborator_data['projects'][self.__project.getProjectID()]['title'] = self.__title
+    def changeStatus(self, status):
         self.__status = status
-    def setPriority(self, priority):
+        for collaborator_data in load_the_collaborators_data(*self.__project.getCollaborators()):
+            collaborator_data['projects'][self.__project.getProjectID()]['status'] = self.__status
+    def changePriority(self, priority):
         self.__priority = priority
-    def setDescription(self, description):
+        for collaborator_data in load_the_collaborators_data(*self.__project.getCollaborators()):
+            collaborator_data['projects'][self.__project.getProjectID()]['priority'] = self.__priority
+    
+    def changeDescription(self, description):
         self.__description = description
-    def setEndTime(self, endtime):
+        for collaborator_data in load_the_collaborators_data(*self.__project.getCollaborators()):
+            collaborator_data['projects'][self.__project.getProjectID()]['description'] = self.__description
+    def changeEndTime(self, endtime):
         self.__endtime = endtime
+        for collaborator_data in load_the_collaborators_data(*self.__project.getCollaborators()):
+            collaborator_data['projects'][self.__project.getProjectID()]['endtime'] = self.__endtime
     def setTaskID(self, taskid):
         self.__taskID = taskid
-    def setComments(self, comments):
-        self.__comments = comments
-    
+        for collaborator_data in load_the_collaborators_data(*self.__project.getCollaborators()):
+            collaborator_data['projects'][self.__project.getProjectID()]['taskID'] = self.__taskID
+            collaborator_data['projects'][self.__project.getProjectID()] = self.__taskID
+
     # Getters
     def getTitle(self):
         return self.__title
@@ -135,10 +159,16 @@ class Task:
     # Others
     def addComment(self, comment):
         self.__comments.append(comment)
+        for collaborator_data in load_the_collaborators_data(*self.__project.getCollaborators()):
+            collaborator_data['projects'][self.__project.getProjectID()]['comments'].append(comment)
     def deleteComment(self, comment):
         self.__comments.remove(comment)
+        for collaborator_data in load_the_collaborators_data(*self.__project.getCollaborators()):
+            collaborator_data['projects'][self.__project.getProjectID()]['comments'].remove(comment)
     def addAssignee(self, assignee):
         self.__assignees.append(assignee)
+        for collaborator_data in load_the_collaborators_data(*self.__project.getCollaborators()):
+            collaborator_data['projects'][self.__project.getProjectID()]['assignees'].append(assignee)
     
     def to_dict(self):
         return {

@@ -1,21 +1,19 @@
 import os, json, GlobalFunctions as GF
 from rich.console import Console
 import user as userlib
-import projects as pr, time
+import projects as pr, time, sys
 from rich.prompt import Prompt, Confirm
 import os, uuid
 from rich.text import Text
 
 def menu():
     introduction = "\n[bold italic]TRELLOMIZE[/]\n[grey70]Transform your project management experience with our innovative platform,\noffering streamlined coordination, real-time updates, and effective task management.[/]\n"
-    choice = GF.choose_by_key_with_kwargs(Text(introduction, justify="center"), SIGNUP = "[grey70]for free![/]", LOGIN = "[grey70]if you already have an account[/]")
+    choice = GF.choose_by_key_with_kwargs(introduction, SIGNUP = "[grey70]for free![/]", LOGIN = "[grey70]if you already have an account[/]")
     if choice == 0:
         signup_page()
     elif choice == 1:
         login_page()
     
-        
-
 def signup_page():
     os.system('cls')
     console = Console()
@@ -102,11 +100,9 @@ def login_page():
         except ValueError as error:
             os.system('cls')
             console.print(error, style="red")
-            console.print("[bold purple4]Enter you email: [/]")
+            console.print("[bold purple4]Enter your email: [/]")
             console.print(email)
-            console.print("[bold purple4]Enter you username: [/]")
-            console.print(username)
-            console.print("[bold purple4]Enter you password: [/]")
+            console.print("[bold purple4]Enter your password: [/]")
             password = input()
             console.print('Successfully logged in!')
 
@@ -139,20 +135,19 @@ def new_project_page(user): #COMPLETEDDDDDDDD
     title = input()
 
     # Checking the project id
-    console.print('[grey70]Enter a title for your project (optional):')
-    myprojectid = input()
-    directory = "AllFiles\\Users"
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-    filename = os.path.join(directory, f"{user.getEmail()}.json")
-    with open(filename, 'r') as f:
-        data = json.load(f)
-    if myprojectid != "" and myprojectid not in data['projects']:
-        my_project = pr.Project(title, user, myprojectid)
-    else:
-        my_project = pr.Project(title, user)
+    #console.print('[grey70]Enter a title for your project (optional):')
+    #myprojectid = input()
+    #directory = "AllFiles\\Users"
+    #if not os.path.exists(directory):
+    #    os.makedirs(directory)
+    #filename = os.path.join(directory, f"{user.getEmail()}.json")
+    #with open(filename, 'r') as f:
+    #    data = json.load(f)
+    #if (myprojectid != "" and data['projects'] and myprojectid not in data['projects']) or (myprojectid != "" and not data['projects']):
+    #    my_project = pr.Project(title, user, myprojectid)
+    #else:
     ########################################
-
+    my_project = pr.Project(title, user)
     my_project.save_to_file(user)
     choice = GF.choose_by_key_with_kwargs(Text(title, justify="center"), BACKLOG='', TODO='', DOING='', DONE='', ARCHIVED='')
     task_page_by_status(user, my_project, choice+1)
@@ -166,7 +161,7 @@ def setting(user):
     if choice == 0:
         os.system('cls')
         console = Console()
-        console.print("[bold purple4]We want to be sure it's your acount, please enter your password.")
+        console.print("[bold purple4]We want to be sure it's your account, please enter your password.")
         password = input()
         while True:
             try:
@@ -184,12 +179,7 @@ def setting(user):
             os.system('cls')
             console.print("[bold purple4]Enter your new username.")
             new_username = input()
-            filename = os.path.join("AllFiles\\Users", f"{user.getEmail()}.json")
-            with open(filename , 'r') as file:
-                data = json.load(file) 
-                data['username'] = new_username #update username
-            with open(filename, 'w') as file:
-                json.dump(data, file, indent=4)
+            user.changeUsername(new_username)
             os.system('cls')
             console.print("\n[bold purple4]Your username has been changed successfully!")
             GF.prompt()
@@ -198,12 +188,7 @@ def setting(user):
             os.system('cls')
             console.print("[bold purple4]Enter your new password.")
             new_password = userlib.hashing(input())
-            filename = os.path.join("AllFiles\\Users", f"{user.getEmail()}.json")
-            with open(filename , 'r') as file:
-                data = json.load(file) 
-                data['password'] = new_password #update password
-            with open(filename, 'w') as file:
-                json.dump(data, file, indent=4) 
+            user.changePassword(new_password)
             os.system('cls')
             console.print("\n[bold purple4]Your password has been changed successfully!")
             GF.prompt()
@@ -215,7 +200,7 @@ def setting(user):
     elif choice == 1:
         os.system('cls')
         console = Console()
-        choice = GF.choose_by_key('Are you sure?' , 'Yes' , 'No')
+        choice = GF.choose_by_key('Are you sure?' , 'Yes' , 'No') 
         if choice == 0:
             os.system('cls')
             login_sys = userlib.Login()
@@ -247,13 +232,10 @@ def setting(user):
                     console.print(email)
                     console.print("[bold purple4]Enter you password: [/]")
                     password = input()
-            console.print("You have delete your acount successfully!")
-            user.delete_account()
-            menu() 
-        elif choice == 1:
-            os.system('cls')
-            setting(user)
-
+            userlib.delete_account(user)
+            console.print("You have deleted your account successfully!")
+            sys.exit()
+            
     elif choice == 2:
         os.system('cls')
         your_account_page(user)
@@ -283,9 +265,9 @@ def task_page_by_status(user, project, status=pr.Status.BACKLOG): # COMPLETEDDDD
         choice = GF.choose_by_key('Enter a title for you task:\n'+title+'\nHow important is this task?', 'LOW', 'MEDIUM', 'HIGH', 'CRITICAL', 'DEFAULT')
         priority = pr.Status(choice+1).value
         if choice != 4:
-            task = pr.Task(title, status, priority)
+            task = pr.Task(title, project, status, priority)
         else:
-            task = pr.Task(title, status)
+            task = pr.Task(title, project, status)
 
         want_to_add_assignee = Confirm.ask('Wanna add any assignee?')        
         if want_to_add_assignee:
@@ -301,3 +283,6 @@ def task_page_by_status(user, project, status=pr.Status.BACKLOG): # COMPLETEDDDD
         console.print(f'Task created in {pr.Status(status).name}.', justify="center")
         GF.prompt()
         your_account_page(user)
+
+def change_task_info():
+    pass
