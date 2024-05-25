@@ -111,60 +111,6 @@ class Task:
         self.__description = ''
         self.__project = project
 
-    # Setters
-    
-    def changeTitle(self, title):
-        self.__title = title
-        data = load_the_collaborators_data(*self.__project.getCollaborators())
-        for collaborator_data in data:
-            collaborator_data['projects'][self.__project.getProjectID()]['title'] = self.__title
-            filename = os.path.join("AllFiles\\Users", f"{data["email"]}.json")
-            with open(filename, 'w') as f:
-                json.dump(data, f, indent=4)
-    def changeStatus(self, status):
-        self.__status = status
-        data = load_the_collaborators_data(*self.__project.getCollaborators())
-        for collaborator_data in data:
-            collaborator_data['projects'][self.__project.getProjectID()]['status'] = self.__status
-            filename = os.path.join("AllFiles\\Users", f"{data["email"]}.json")
-            with open(filename, 'w') as f:
-                json.dump(data, f, indent=4)
-    def changePriority(self, priority):
-        self.__priority = priority
-        data = load_the_collaborators_data(*self.__project.getCollaborators())
-        for collaborator_data in data:
-            collaborator_data['projects'][self.__project.getProjectID()]['priority'] = self.__priority
-            filename = os.path.join("AllFiles\\Users", f"{data["email"]}.json")
-            with open(filename, 'w') as f:
-                json.dump(data, f, indent=4)
-    
-    
-    def changeDescription(self, description):
-        self.__description = description
-        data = load_the_collaborators_data(*self.__project.getCollaborators())
-        for collaborator_data in data:
-            collaborator_data['projects'][self.__project.getProjectID()]['description'] = self.__description
-            filename = os.path.join("AllFiles\\Users", f"{collaborator_data['email']}.json")
-            with open(filename, 'w') as f:
-                json.dump(data, f, indent=4)
-    def changeEndTime(self, endtime):
-        self.__endtime = endtime
-        data = load_the_collaborators_data(*self.__project.getCollaborators())
-        for collaborator_data in data:
-            collaborator_data['projects'][self.__project.getProjectID()]['endtime'] = self.__endtime
-            filename = os.path.join("AllFiles\\Users", f"{collaborator_data['email']}.json")
-            with open(filename, 'w') as f:
-                json.dump(data, f, indent=4)
-    def setTaskID(self, taskid):
-        self.__taskID = taskid
-        data = load_the_collaborators_data(*self.__project.getCollaborators())
-        for collaborator_data in data:
-            collaborator_data['projects'][self.__project.getProjectID()]['taskID'] = self.__taskID
-            collaborator_data['projects'][self.__project.getProjectID()] = self.__taskID
-            filename = os.path.join("AllFiles\\Users", f"{collaborator_data['email']}.json")
-            with open(filename, 'w') as f:
-                json.dump(data, f, indent=4)
-
     # Getters
     def getTitle(self):
         return self.__title
@@ -183,6 +129,37 @@ class Task:
     def getAssignees(self):
         return self.__assignees
 
+    # Change Functions
+    
+    def write_to_the_file(self, field, new):
+        data = load_the_collaborators_data(*self.__project.getCollaborators())
+        for collaborator_data in data:
+            for i in range(len(collaborator_data['projects'][self.__project.getProjectID()]["tasks"])):
+                collaborator_data['projects'][self.__project.getProjectID()]['tasks'][i][field] = new
+                filename = os.path.join("AllFiles\\Users", f"{collaborator_data['email']}.json")
+                with open(filename, 'w') as f:
+                    json.dump(collaborator_data, f, indent=4)
+
+    def changeTitle(self, title):
+        self.__title = title
+        self.write_to_the_file('title', self.__title)
+    def changeStatus(self, status):
+        self.__status = status
+        self.write_to_the_file('status', self.__status)
+    def changePriority(self, priority):
+        self.__priority = priority
+        self.write_to_the_file('priority', self.__priority)
+    def changeDescription(self, description):
+        self.__description = description
+        self.write_to_the_file('description', self.__description)
+    def changeEndTime(self, endtime):
+        self.__endtime = endtime
+        self.write_to_the_file('endtime', self.__endtime)
+    def setTaskID(self, taskid):
+        self.__taskID = taskid
+        self.write_to_the_file('taskID', self.__taskID)
+
+    
     # Others
     def addComment(self, comment):
         self.__comments.append(comment)
@@ -192,7 +169,8 @@ class Task:
                 collaborator_data['projects'][self.__project.getProjectID()]["tasks"][i]['comments'].append(comment)
                 filename = os.path.join("AllFiles\\Users", f"{collaborator_data["email"]}.json")
                 with open(filename, 'w') as f:
-                    json.dump(data, f, indent=4)
+                    json.dump(collaborator_data, f, indent=4)
+                    
     def deleteComment(self, comment):
         self.__comments.remove(comment)
         data = load_the_collaborators_data(*self.__project.getCollaborators())
@@ -201,7 +179,7 @@ class Task:
                 collaborator_data['projects'][self.__project.getProjectID()]["tasks"][i]['comments'].remove(comment)
                 filename = os.path.join("AllFiles\\Users", f"{collaborator_data["email"]}.json")
                 with open(filename, 'w') as f:
-                    json.dump(data, f, indent=4)
+                    json.dump(collaborator_data, f, indent=4)
                 
     def addAssignee(self, assignee):
         self.__assignees.append(assignee)
@@ -211,7 +189,7 @@ class Task:
                 collaborator_data['projects'][self.__project.getProjectID()]["tasks"][i]["assignees"].append(assignee.to_dict())
                 filename = os.path.join("AllFiles\\Users", f"{collaborator_data["email"]}.json")
                 with open(filename, 'w') as f:
-                    json.dump(data, f, indent=4)
+                    json.dump(collaborator_data, f, indent=4)
                 
     
     def to_dict(self):
