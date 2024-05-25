@@ -8,8 +8,6 @@ def hashing(password):
         sha256.update(password.encode('utf-8'))
         return sha256.hexdigest()
 
-
-
 class User:
     def __init__(self, email, username, password):
         self.__email = email
@@ -41,7 +39,7 @@ class User:
         }
     
     def save_to_file(self):
-        directory = "AllFiles/Users"
+        directory = "AllFiles\\Users"
         if not os.path.exists(directory):
             os.makedirs(directory)
 
@@ -51,7 +49,7 @@ class User:
 
     def delete_account(self):
         console = Console()
-        directory = "AllFiles/Users"
+        directory = "AllFiles\\Users"
         filename = os.path.join(directory, f"{self.__email}.json")
         if os.path.exists(filename):
             os.remove(filename)
@@ -70,7 +68,7 @@ class SignUp:
         if not (email.endswith('@gmail.com') or email.endswith('@yahoo.com')):
             raise ValueError('Invalid email!')
         
-        directory = "AllFiles/Users"
+        directory = "AllFiles\\Users"
         filename = os.path.join(directory, f"{email}.json")
         if os.path.exists(filename):
             raise FileExistsError('Email Already Exists!! Try Another One.')
@@ -97,7 +95,7 @@ class Login:
         if len(password) < 8:
             raise ValueError('Password must have at least 8 characters!')
 
-        directory = "AllFiles/Users"
+        directory = "AllFiles\\Users"
         filename = os.path.join(directory, f"{email}.json")
         with open(filename, 'r') as file:
             data = json.load(file)
@@ -109,7 +107,7 @@ class Login:
     def correct_email(self, email): 
         if not (email.endswith('@gmail.com') or email.endswith('@yahoo.com')):
             raise ValueError('Invalid email!')
-        directory = "AllFiles/Users"
+        directory = "AllFiles\\Users"
         filename = os.path.join(directory, f"{email}.json")
         if not os.path.exists(filename):
             raise FileExistsError("This email does not exist.")

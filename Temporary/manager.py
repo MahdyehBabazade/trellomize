@@ -1,8 +1,7 @@
-import argparse
-import time
-import os, shutil
-import hashlib
-import json
+import argparse, time, os, shutil, hashlib, json, GlobalFunctions as GF
+from rich.console import Console
+from rich.prompt import Confirm
+from rich.progress import Progress
 
 def hashing(password):
         sha256 = hashlib.sha256()
@@ -10,7 +9,7 @@ def hashing(password):
         return sha256.hexdigest()
 
 class Admin:
-    def __init__(self, username, password) -> None:
+    def __init__(self, username, password):
         self.__username = username
         self.__password = hashing(password)
     
@@ -25,24 +24,41 @@ class Admin:
     def getPassword(self):
         return self.__password
     
+    def to_dict(self):
+        return {
+            'username': self.__username,
+            'password': self.__password
+        }
+    
 def manager_signup(username, password):
     admin = Admin(username, password)
     directory = "AllFiles\\Managers"
     if not os.path.exists(directory):
         os.makedirs(directory)
-
-    filename = os.path.join(directory, f"{admin.getUsername}.json")  #files works with email not username
-    with open(filename, "w") as f:
-            json.dump(admin.__dict__, f, indent=4)
+    filename = os.path.join(directory, f"{admin.getUsername()}.json")  #files works with email not username
+    while True:
+        try:
+            if os.path.exists(filename):
+                raise FileExistsError('Admin Already Exists!! Try Another Username.')
+            else:
+                with open(filename, "w") as f:
+                    json.dump(admin.to_dict(), f, indent=4)
+                break
+        except FileExistsError as error:
+            console = Console()
+            console.print(str(error), style='bold red')            
     
 
 def purge_data():
-    confirmation = input("Are you sure you want to purge all data? This action cannot be undone. (yes/no): ")
-    if confirmation.lower() == 'yes':
-        print("Purging all data...")
-        time.sleep(2)
+    wante_to_purge_data = Confirm.ask("Are you sure you want to purge all data? This action cannot be undone.: ")
+    if wante_to_purge_data:
         directory = "AllFiles\\Users"
         if os.path.exists(directory):
+            progress = Progress()
+            task = progress.add_task("Purging all data...", total=100)
+            while not progress.finished:
+                progress.update(task, advance=1)
+                time.sleep(0.05)
             shutil.rmtree(directory)
             print("All data has been purged.")
     else:

@@ -268,6 +268,8 @@ def task_page_by_status(user, project, status=pr.Status.BACKLOG): # COMPLETEDDDD
             task = pr.Task(title, project, status, priority)
         else:
             task = pr.Task(title, project, status)
+    
+        project.addTask(task, user)
 
         want_to_add_assignee = Confirm.ask('Wanna add any assignee?')        
         if want_to_add_assignee:
@@ -278,8 +280,7 @@ def task_page_by_status(user, project, status=pr.Status.BACKLOG): # COMPLETEDDDD
         want_to_add_description = Confirm.ask('Wanna add any description?')
         if want_to_add_description:
             description = Prompt.ask('Write a description for your task: ')
-            task.setDescription(description)
-        project.addTask(task, user)
+            task.changeDescription(description)
         console.print(f'Task created in {pr.Status(status).name}.', justify="center")
         GF.prompt()
         your_account_page(user)
