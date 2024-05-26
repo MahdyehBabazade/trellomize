@@ -13,6 +13,7 @@ class User:
         self.__email = email
         self.__username = username
         self.__password = hashing(password)
+        self.__isActive = True
     
     # Change  
     def changeUsername(self, username):
@@ -35,7 +36,8 @@ class User:
         return {
             "email": self.__email,
             "username": self.__username,
-            "password": self.__password
+            "password": self.__password,
+            "isActive": self.__isActive
         }
     
     def save_to_file(self):
@@ -112,7 +114,7 @@ class Login:
         if not os.path.exists(filename):
             raise FileExistsError("This email does not exist.")
         return True
-
+    
     def load(self, email, password):
         if self.correct_email(email) and self.correct_password(email, password):
             return True
