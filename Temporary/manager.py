@@ -69,12 +69,12 @@ def show_users():
     with open(filename, 'r') as f:
         data = json.load(f)
     if data['isActive']:
-        choice = GF.choose_by_key('This account is active. Click to deactivate it.')
+        choice = GF.choose_by_key('This account is active. Press Enter to deactivate it.')
         change_activeness = Confirm.ask('Are you sure?')
         if change_activeness:
             data['isActive'] = False
     else:
-        choice = GF.choose_by_key('This account is not active. Click to activate it.')
+        choice = GF.choose_by_key('This account is not active. Press Enter to activate it.', )
         change_activeness = Confirm.ask('Are you sure?')
         if change_activeness:
             data['isActive'] = True

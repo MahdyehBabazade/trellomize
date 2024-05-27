@@ -9,10 +9,11 @@ def hashing(password):
         return sha256.hexdigest()
 
 class User:
-    def __init__(self, email, username, password):
+    def __init__(self, email, username, password, is_hashed=False):
         self.__email = email
         self.__username = username
-        self.__password = hashing(password)
+        # is_hashed falg is used in creating an object of this class when we load a user from a JSON file
+        self.__password = password if is_hashed else hashing(password)
         self.__isActive = True
     
     # Change  
@@ -30,7 +31,12 @@ class User:
         return self.__username
     def getPassword(self):
         return self.__password 
+    def getIsActive(self):
+        return self.__isActive
 
+    # Setters
+    def setIsActive(self, activeness):
+        self.__isActive = activeness
     # Others
     def to_dict(self):
         return {
@@ -57,11 +63,6 @@ class User:
             os.remove(filename)
         else:
             console.print(f"File for {self.__email} does not exist.")
-        
-        #if not os.path.exists(filename):
-        #    raise FileNotFoundError('User not found')
-        #os.remove(filename)
-        #pg.menu()
 
 
 class SignUp:
@@ -116,6 +117,11 @@ class Login:
         return True
     
     def load(self, email, password):
-        if self.correct_email(email) and self.correct_password(email, password):
-            return True
-        return False
+        filename = os.path.join("AllFiles/Users", f"{email}.json") #change \\ to /
+        with open(filename, 'r') as file:
+            data = json.load(file)
+            username = data.get("username")
+            activeness = data["isActive"]
+            user = User(email , username , password)
+            user.setIsActive(activeness)
+        return user
