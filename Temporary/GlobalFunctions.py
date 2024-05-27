@@ -6,6 +6,18 @@ def prompt():
     print('\nPress any key to continue.')
     key = msvcrt.getch()
 
+def log_actions(user):
+
+    directory = "AllFiles\\Logs"
+    if not os.path.exists(user.getEmail()):
+            os.makedirs(directory)
+
+    logging.basicConfig(
+        filename = os.path.join(directory, f"{user.getEmail()}.log"),
+        level = logging.INFO,
+        format = '%(asctime)s - %(levelname)s - %(message)s'
+    )
+
 def choose_by_key_with_kwargs(description="", **kwargs):
     console = Console()
     current_pos = 0
