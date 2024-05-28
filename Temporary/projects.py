@@ -4,17 +4,6 @@ import os
 import json, user as userlib
 from enum import Enum
 
-def load_the_collaborators_data(*args): # Returns all the collaborators' data in a list. Args are emails of the collaborators
-    directory = "AllFiles\\Users"
-    data = []
-    for email in args:
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-        filename = os.path.join(directory, f"{email}.json")
-        with open(filename, "r") as f:
-            data.append(json.load(f))
-    return data
-
 class Project:
     def __init__(self, title, leader, ProjectID = str(uuid.uuid1())):
         self.__title = title
@@ -26,12 +15,14 @@ class Project:
     # Setters
     def changeTitle(self, title):
         self.__title = title
-        for collaborator_data in load_the_collaborators_data(self.__collaborators):
+        for collaborator_data in GF.load_the_collaborators_data(*[collab.getEmail() for collab in self.__collaborators]):
             collaborator_data['projects'][self.__ProjectID]['title'] = self.__title
+            GF.write_to_the_file(collaborator_data)
     def changeProjectId(self, id):
         self.__ProjectID = id
-        for collaborator_data in load_the_collaborators_data(self.__collaborators):
+        for collaborator_data in GF.load_the_collaborators_data(*[collab.getEmail() for collab in self.__collaborators]):
             collaborator_data['projects'][self.__ProjectID]['ProjectID'] = self.__ProjectID
+            GF.write_to_the_file(collaborator_data)
     def setCollaborators(self, collabs):
         self.__collaborators = collabs
     def setTask(self, task):
@@ -52,24 +43,26 @@ class Project:
     # Other
     def addTask(self, task): # This one adds to the file but setTask doesnt
         self.__tasks.append(task)
-        for collaborator_data in load_the_collaborators_data(*[collab.getEmail() for collab in self.__collaborators]):
+        for collaborator_data in GF.load_the_collaborators_data(*[collab.getEmail() for collab in self.__collaborators]):
             collaborator_data["projects"][self.__ProjectID]['tasks'] = [task.to_dict() for task in self.__tasks]
             GF.write_to_the_file(collaborator_data)
     def removeTask(self, task):
         self.__tasks.remove(task)
-        for collaborator_data in load_the_collaborators_data(*[collab.getEmail() for collab in self.__collaborators]):
+        for collaborator_data in GF.load_the_collaborators_data(*[collab.getEmail() for collab in self.__collaborators]):
             collaborator_data['projects'][self.__ProjectID]['tasks'] = [task.to_dict() for task in self.__tasks]
             GF.write_to_the_file(collaborator_data)
-    def addCollaborator(self, collaborator):
-        self.__collaborators.append(collaborator)
-        for collaborator_data in load_the_collaborators_data(*[collab.getEmail() for collab in self.__collaborators]):
-            collaborator_data['projects'][self.__ProjectID]['collaborators'] = [collaborator.to_dict() for collaborator in self.__collaborators]
-            GF.write_to_the_file(collaborator_data)
+    def addCollaborator(self, collaborator): #چون که دستی ایمیل رو وارد میکنیم احتمال خطا و وارد کردن ایمیل کلبریتور هست پس ایف میزاریم
+        if collaborator not in self.__collaborators:
+            self.__collaborators.append(collaborator)
+            for collaborator_data in GF.load_the_collaborators_data(*[collab.getEmail() for collab in self.__collaborators]):
+                collaborator_data['projects'][self.__ProjectID]['collaborators'] = [collaborator.to_dict() for collaborator in self.__collaborators]
+                GF.write_to_the_file(collaborator_data)
     def removeCollaborator(self, collaborator):
-        self.__collaborators.remove(collaborator)
-        for collaborator_data in load_the_collaborators_data(*[collab.getEmail() for collab in self.__collaborators]):
-            collaborator_data['projects'][self.__ProjectID]['collaborators'] = [collaborator.to_dict() for collaborator in self.__collaborators]
-            GF.write_to_the_file(collaborator_data)
+        if collaborator in self.__collaborators:
+            self.__collaborators.remove(collaborator)
+            for collaborator_data in GF.load_the_collaborators_data(*[collab.getEmail() for collab in self.__collaborators]):
+                collaborator_data['projects'][self.__ProjectID]['collaborators'] = [collaborator.to_dict() for collaborator in self.__collaborators]
+                GF.write_to_the_file(collaborator_data)
 
     def to_dict(self):
         return {
@@ -170,7 +163,7 @@ class Task:
     # Change Functions
     
     def write_to_the_file(self, field, new):
-        data = load_the_collaborators_data(*[collab.getEmail() for collab in self.__project.getCollaborators()])
+        data = GF.load_the_collaborators_data(*[collab.getEmail() for collab in self.__project.getCollaborators()])
         for collaborator_data in data:
             for i in range(len(collaborator_data['projects'][self.__project.getProjectID()]["tasks"])):
                 collaborator_data['projects'][self.__project.getProjectID()]['tasks'][i][field] = new
@@ -198,7 +191,7 @@ class Task:
     # Others
     def addComment(self, comment):
         self.__comments.append(comment)
-        data = load_the_collaborators_data(*[collab.getEmail() for collab in self.__project.getCollaborators()])
+        data = GF.load_the_collaborators_data(*[collab.getEmail() for collab in self.__project.getCollaborators()])
         for collaborator_data in data:
             for i in range(len(collaborator_data['projects'][self.__project.getProjectID()]["tasks"])):
                 collaborator_data['projects'][self.__project.getProjectID()]["tasks"][i]['comments'].append(comment.to_dict())
@@ -206,7 +199,7 @@ class Task:
                     
     def deleteComment(self, comment):
         self.__comments.remove(comment)
-        data = load_the_collaborators_data(*[collab.getEmail() for collab in self.__project.getCollaborators()])
+        data = GF.load_the_collaborators_data(*[collab.getEmail() for collab in self.__project.getCollaborators()])
         for collaborator_data in data:
             for i in range(len(collaborator_data['projects'][self.__project.getProjectID()]["tasks"])):
                 collaborator_data['projects'][self.__project.getProjectID()]["tasks"][i]['comments'].remove(comment.to_dict())
@@ -214,7 +207,7 @@ class Task:
                 
     def addAssignee(self, assignee):
         self.__assignees.append(assignee)
-        data = load_the_collaborators_data(*[collab.getEmail() for collab in self.__project.getCollaborators()])
+        data = GF.load_the_collaborators_data(*[collab.getEmail() for collab in self.__project.getCollaborators()])
         for collaborator_data in data:
             for i in range(len(collaborator_data['projects'][self.__project.getProjectID()]["tasks"])):
                 collaborator_data['projects'][self.__project.getProjectID()]["tasks"][i]["assignees"].append(assignee.to_dict())

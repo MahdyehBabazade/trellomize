@@ -163,11 +163,11 @@ def load_projects_page(user):
                 if choice == 0: #collab
                     os.system('cls')
                     while True:
-                        choice =GF.choose_by_key("[bold italic white]\nWhat do you want to do with collaborators?" , "see collaborators" , "add collaborator" , "remove collaborator" , "Back")
+                        choice = GF.choose_by_key("[bold italic white]\nWhat do you want to do with collaborators?" , "see collaborators" , "add collaborator" , "remove collaborator" , "Back")
                         if choice == 0: # See collabs
                             os.system('cls')
                             collab_emails = [collab.getEmail() for collab in project.getCollaborators()]
-                            collaborators = pr.load_the_collaborators_data(*collab_emails)
+                            collaborators = GF.load_the_collaborators_data(*collab_emails)
                             console.print("[bold italic white]\nHere you can see the collaborators...")
                             for i in range(len(collaborators)):
                                 console.print(f"{i+1}. [bold purple4]{collaborators[i]["username"]} - {collaborators[i]["email"]}")
@@ -179,7 +179,7 @@ def load_projects_page(user):
                             if user.getEmail() == project.getLeader().getEmail():
                                 console.print("Enter the collabrator's email: ", style="bold purple4")
                                 email = input()
-                                while  True:
+                                for attempt in range(5):
                                     try:
                                         if login_sys.correct_email(email):
                                             break
@@ -209,17 +209,17 @@ def load_projects_page(user):
                         elif choice == 2: #remove collab
                             os.system('cls')
                             if user.getEmail() == project.getLeader().getEmail():
-                                collab_emails = [collab.getEmail() for collab in project.getCollaborators()]
+                                collab_emails = [collab.getEmail() for collab in project.getCollaborators() if collab.getEmail() != user.getEmail()]
                                 collab_emails.append("Back")
-                                collaborators = pr.load_the_collaborators_data(*collab_emails)
                                 choice = GF.normal_choose("[bold italic white]\nWhich one of the collaborators do you want to remove from the project?", *collab_emails)
-                                if choice != len(collab_emails)-1:
-                                    project.removeCollaborator(collaborators[choice])
-                                    project.remove_from_file(new_collaborator)
-                                    console.print("[bold purple4]You have successfully removed a collaborator")
-                                else:
+                                print(choice)
+                                if choice == len(collab_emails)-1:
                                     break
-                                GF.prompt()
+                                else:
+                                    collab = project.getCollaborators()[choice+1]
+                                    project.removeCollaborator(collab)
+                                    project.remove_from_file(collab) #بعلاوه یک میکنیم چون نمیخوایم خود لیدر هم حساب بشه
+                                    console.print("[bold purple4]You have successfully removed a collaborator")
                             else:
                                 console.print("You are not the leader. You cannot remove anyone from the project")
                                 break
@@ -240,7 +240,7 @@ def load_projects_page(user):
                             elif choice == 0:
                                 task_page(user, project)
                             else:
-                                task = tasks[choice]
+                                task = tasks[choice-1]
                                 choice = GF.choose_by_key("[bold italic white]Choose what you want to do to the tasks:", "remove task", "change title", "change the status", "change its priority", "change the description", "comments", "assignees")
                                 if user.getEmail() in [assignee.getEmail() for assignee in task.getAssignees()] or user.getEmail() == project.getLeader().getEmail():
                                     if choice == 0: # remove task
@@ -248,27 +248,22 @@ def load_projects_page(user):
                                         if want_to_remove:
                                             project.removeTask(task)
                                             console.print('Task successfully deleted.')
-                                        GF.prompt()
                                     elif choice == 1: # change title
                                         console.print(f"This tasks' title: {task.getTitle()}\nEnter the new title: ")
                                         task.changeTitle(input())
                                         console.print("[green]Title successfullly changed.")
-                                        break
                                     elif choice == 2: # change the status
                                         choice = GF.choose_by_key(f"This tasks' status: {pr.Status(task.getStatus()).name}\nI want to move this task to the: ", "BACKLOG", "TODO", "DOING", "DONE", "ARCHIEVED")
                                         task.changeStatus(pr.Status(choice+1).value)
                                         console.print("[green]Status successfullly changed.")
-                                        break
                                     elif choice == 3: # change the priority
-                                        choice = GF.choose_by_key(f"This tasks' priority: {pr.Status(task.getStatus()).name}\nChange its priority to:", "LOW", "MEDIUM", "HIGH", "CRITICAL")
+                                        choice = GF.choose_by_key(f"This tasks' priority: {pr.Priority(task.getStatus()).name}\nChange its priority to:", "LOW", "MEDIUM", "HIGH", "CRITICAL")
                                         task.changePriority(pr.Priority(choice+1).value)
                                         console.print("[green]Priority successfullly changed.")
-                                        break
                                     elif choice == 4: # change the description
-                                        console.print(f"This tasks' description: {task.getDescription()}\nWrite the new description here::")
+                                        console.print(f"This tasks' description: {task.getDescription()}\nWrite the new description here:")
                                         task.changeDescription(input())
                                         console.print("[green]Description successfullly changed.")
-                                        break
                                     elif choice == 5: # comments
                                         comments = [f'{cm.getPerson().getUsername()}: {cm.getText()}\n' for cm in task.getComments()]
                                         choice = GF.normal_choose("", "+ Add a comment on this task\n", *comments)
@@ -333,7 +328,8 @@ def load_projects_page(user):
                                 choice4 = GF.choose_by_key("[bold italic white]\nWhat do you want to change?" , "Title" , "Id" , "Back")
                                 if choice4 == 0:
                                     os.system('cls')
-                                    new_title = input("[bold italic white]\nEnter your new title :")
+                                    console.print("[bold italic white]\nEnter your new title :")
+                                    new_title = input()
                                     project.changeTitle(new_title)
                                     console.print("[bold purple4]Your title has been successfully changed!")
                                     GF.prompt()
@@ -354,7 +350,7 @@ def load_projects_page(user):
                     break
 
 def setting(user):
-    choice = GF.choose_by_key("What do you want to do?" , "edit my profile" , "delete account" , "Back")
+    choice = GF.choose_by_key("What do you want to do?" , "edit my profile" , "logout" , "Back")
     if choice == 0:
         os.system('cls')
         console = Console()
@@ -395,43 +391,7 @@ def setting(user):
             setting(user)
 
     elif choice == 1:
-        os.system('cls')
-        console = Console()
-        choice = GF.choose_by_key('Are you sure?' , 'Yes' , 'No') 
-        if choice == 0:
-            os.system('cls')
-            login_sys = userlib.Login()
-            console.print("[bold purple4]Enter your email: [/]")
-            email = input()
-            while True:
-                try:
-                    if login_sys.correct_email(email):
-                        break
-                except ValueError as error:
-                    os.system('cls')
-                    console.print(error, style="red")
-                    console.print("[bold purple4]Enter you email: [/]")
-                    email = input()
-                except FileExistsError as error:
-                    os.system('cls')
-                    console.print(error, style="red")
-                    console.print("[bold purple4]Enter you email: [/]")
-                    email = input()
-            console.print("[bold purple4]Enter your password: [/]") 
-            password = input()
-            while True:
-                if userlib.hashing(password) == user.getPassword():
-                    break      
-                else:
-                    os.system('cls')
-                    console.print("Invalid password", style="red")
-                    console.print("[bold purple4]Enter you email: [/]")
-                    console.print(email)
-                    console.print("[bold purple4]Enter you password: [/]")
-                    password = input()
-            userlib.delete_account(user)
-            console.print("You have deleted your account successfully!")
-            sys.exit()
+        logout_page(user)
             
     elif choice == 2:
         os.system('cls')

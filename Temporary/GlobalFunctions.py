@@ -91,9 +91,9 @@ def normal_choose(description="", *args):   # Overloaded Function
         console.print(description)
         for i in range(len(args)):
             if i == current_pos:
-                console.print(f"{i}. {args[i]}\n", style="purple")
+                console.print(f"{i+1}. {args[+1]}\n", style="purple")
             else:
-                console.print(f"{i}. {args[i]}\n")
+                console.print(f"{i+1}. {args[i]}\n")
         console.print("Press 'q' to quit.", style="grey69")
         key = msvcrt.getch() # getch returns a byte
         if (key == b"w" or key == b"H"): # H  is for PgUp
@@ -127,3 +127,14 @@ def write_to_the_file(data):
     filename = os.path.join("AllFiles\\Users", f"{data["email"]}.json")
     with open(filename, "w") as f:
         json.dump(data, f, indent=4)
+
+def load_the_collaborators_data(*args): # Returns all the collaborators' data in a list. Args are emails of the collaborators
+    directory = "AllFiles\\Users"
+    data = []
+    for email in args:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        filename = os.path.join(directory, f"{email}.json")
+        with open(filename, "r") as f:
+            data.append(json.load(f))
+    return data

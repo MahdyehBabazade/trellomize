@@ -106,11 +106,6 @@ def purge_data():
     if confirm_purge:
         directory = "AllFiles/Users"
         if os.path.exists(directory):
-            with Progress() as progress:
-                task = progress.add_task("Purging all data...", total=100)
-                for _ in range(100):
-                    progress.update(task, advance=1)
-                    time.sleep(0.05)
             shutil.rmtree(directory)
             print("All data has been purged.")
     else:
