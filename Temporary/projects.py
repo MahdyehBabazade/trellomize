@@ -1,7 +1,4 @@
-import datetime, GlobalFunctions as GF
-import uuid
-import os
-import json, user as userlib
+import datetime, GlobalFunctions as GF, uuid, os, json, user as userlib
 from enum import Enum
 
 class Project:
@@ -250,7 +247,7 @@ def load_from_file(project_id, user):  #maybe it has error too
 
 
 class Comment:
-    def __init__(self, text, person, time=datetime.datetime.now()) -> None:
+    def __init__(self, text, person, time=(datetime.datetime.now()).isoformat()) -> None:
         self.__text = text
         self.__person =  person
         self.__time = time

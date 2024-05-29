@@ -55,15 +55,6 @@ class User:
         with open(filename, "w") as f:
             json.dump(self.to_dict(), f, indent=4)
 
-    def delete_account(self):
-        console = Console()
-        directory = "AllFiles\\Users"
-        filename = os.path.join(directory, f"{self.__email}.json")
-        if os.path.exists(filename):
-            os.remove(filename)
-        else:
-            console.print(f"File for {self.__email} does not exist.")
-
 
 class SignUp:
 

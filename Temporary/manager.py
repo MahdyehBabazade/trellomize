@@ -4,7 +4,6 @@ import shutil
 import hashlib
 import json
 import glob
-import time
 from rich.console import Console
 from rich.prompt import Confirm
 from rich.progress import Progress

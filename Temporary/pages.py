@@ -1,4 +1,4 @@
-import os, json, GlobalFunctions as GF
+import os, json, GlobalFunctions as GF, ProjectDisplay as PD
 from rich.console import Console
 import user as userlib
 import projects as pr, time, sys
@@ -133,6 +133,36 @@ def new_project_page(user): #COMPLETEDDDDDDDD
     title = input()
     my_project = pr.Project(title, user)
     my_project.save_to_file(user)
+    want_collab =Prompt.ask("Wanna add any collaborators?")
+    if want_collab:
+        login_sys = userlib.Login()
+        if user.getEmail() == my_project.getLeader().getEmail():
+            console.print("Enter the collabrator's email: ", style="bold purple4")
+            email = input()
+            for attempt in range(5):
+                try:
+                    if login_sys.correct_email(email):
+                        break
+                except ValueError as error:
+                    os.system('cls')
+                    console.print(error, style="red")
+                    console.print("[bold purple4]Enter the email: [/]")
+                    email = input()
+                except FileExistsError as error:
+                    os.system('cls')
+                    console.print(error, style="red")
+                    console.print("[bold purple4]Enter the email: [/]")
+                    email = input()
+            filename = os.path.join("AllFiles/Users", f"{email}.json")
+            with open(filename, 'r') as file:
+                data = json.load(file)
+            username = data.get("username")
+            password = data.get("password")
+            new_collaborator = userlib.User(email , username , password, True)
+            my_project.save_to_file(new_collaborator)
+            my_project.addCollaborator(new_collaborator)
+            console.print("[bold purple4]You have successfully added a new collaborator")
+            GF.prompt()
     choice = GF.choose_by_key_with_kwargs(Text(title, justify="center"), BACKLOG='', TODO='', DOING='', DONE='', ARCHIVED='')
     task_page_by_status(user, my_project, choice+1)
 
@@ -158,79 +188,35 @@ def load_projects_page(user):
             project_title = title_list[choice]
             project_id = projectID_list[choice]
             project = pr.load_from_file(project_id, user)
+            
             while True:
-                choice = GF.choose_by_key(f"[bold italic white]\nWhat do you want to do with {project_title} project?" , "collaborators" , "tasks" , "setting of project" , "Back")
-                if choice == 0: #collab
-                    os.system('cls')
-                    while True:
-                        choice = GF.choose_by_key("[bold italic white]\nWhat do you want to do with collaborators?" , "see collaborators" , "add collaborator" , "remove collaborator" , "Back")
-                        if choice == 0: # See collabs
-                            os.system('cls')
-                            collab_emails = [collab.getEmail() for collab in project.getCollaborators()]
-                            collaborators = GF.load_the_collaborators_data(*collab_emails)
-                            console.print("[bold italic white]\nHere you can see the collaborators...")
-                            for i in range(len(collaborators)):
-                                console.print(f"{i+1}. [bold purple4]{collaborators[i]["username"]} - {collaborators[i]["email"]}")
-                            GF.prompt()
-                        elif choice == 1: #add collab
-                            os.system('cls')
-                            console = Console()
-                            login_sys = userlib.Login()
-                            if user.getEmail() == project.getLeader().getEmail():
-                                console.print("Enter the collabrator's email: ", style="bold purple4")
-                                email = input()
-                                for attempt in range(5):
-                                    try:
-                                        if login_sys.correct_email(email):
-                                            break
-                                    except ValueError as error:
-                                        os.system('cls')
-                                        console.print(error, style="red")
-                                        console.print("[bold purple4]Enter the email: [/]")
-                                        email = input()
-                                    except FileExistsError as error:
-                                        os.system('cls')
-                                        console.print(error, style="red")
-                                        console.print("[bold purple4]Enter the email: [/]")
-                                        email = input()
-                                filename = os.path.join("AllFiles/Users", f"{email}.json")
-                                with open(filename, 'r') as file:
-                                    data = json.load(file)
-                                username = data.get("username")
-                                password = data.get("password")
-                                new_collaborator = userlib.User(email , username , password, True)
-                                project.save_to_file(new_collaborator)
-                                project.addCollaborator(new_collaborator)
-                                console.print("[bold purple4]You have successfully added a new collaborator")
-                                GF.prompt()
-                            else:
-                                console.print("You are not the leader. You cannot add anyone to the project")
-                                break
-                        elif choice == 2: #remove collab
-                            os.system('cls')
-                            if user.getEmail() == project.getLeader().getEmail():
-                                collab_emails = [collab.getEmail() for collab in project.getCollaborators() if collab.getEmail() != user.getEmail()]
-                                collab_emails.append("Back")
-                                choice = GF.normal_choose("[bold italic white]\nWhich one of the collaborators do you want to remove from the project?", *collab_emails)
-                                print(choice)
-                                if choice == len(collab_emails)-1:
-                                    break
-                                else:
-                                    collab = project.getCollaborators()[choice+1]
-                                    project.removeCollaborator(collab)
-                                    project.remove_from_file(collab) #بعلاوه یک میکنیم چون نمیخوایم خود لیدر هم حساب بشه
-                                    console.print("[bold purple4]You have successfully removed a collaborator")
-                            else:
-                                console.print("You are not the leader. You cannot remove anyone from the project")
-                                break
-                        elif choice == 3:
-                            break
-                elif choice == 1: # Task
-                    os.system('cls')
+                choice = GF.choose_by_key(f"[bold italic white]\nWhat do you want to do with {project_title} project?", "see the project board" , "collaborators" , "setting of project" , "Back")
+                if choice == 0:
+                    backlogs = ""
+                    for task in project.getTasks():
+                        if task.getStatus() == 1:
+                            backlogs += f"{task.getTitle()}\n"
+                    todos = ""
+                    for task in project.getTasks():
+                        if task.getStatus() == 2:
+                            todos += f"{task.getTitle()}\n"
+                    doings = ""
+                    for task in project.getTasks():
+                        if task.getStatus() == 3:
+                            doings += f"{task.getTitle()}\n"
+                    dones = ""
+                    for task in project.getTasks():
+                        if task.getStatus() == 4:
+                            dones += f"{task.getTitle()}\n"
+                    archiveds = ""
+                    for task in project.getTasks():
+                        if task.getStatus() == 5:
+                            archiveds += f"{task.getTitle()}\n"
+                    pd_choice = GF.switch_panels(GF.create_layout(), ["BACKLOG", "TODO", "DOING", "DONE", "ARCHIVED"], [backlogs, todos, doings, dones, archiveds])
+                    tasks = [task for task in project.getTasks() if pd_choice+1 == task.getStatus()]
                     while True:
                         os.system('cls')
-                        tasks = project.getTasks() #return object ?
-                        tasks_title_and_id = [task.getTitle()+' - '+task.getTaskID() for task in tasks]
+                        tasks_title_and_id = [task.getTitle()+' - '+ task.getTaskID() for task in tasks]
                         tasks_title_and_id.insert(0, "+ Add a task on this project")
                         tasks_title_and_id.append("Back")
                         while True:
@@ -238,10 +224,10 @@ def load_projects_page(user):
                             if choice == len(tasks_title_and_id)-1:
                                 break
                             elif choice == 0:
-                                task_page(user, project)
+                                task_page_by_status(user, project, tasks[pd_choice].getStatus())
                             else:
                                 task = tasks[choice-1]
-                                choice = GF.choose_by_key("[bold italic white]Choose what you want to do to the tasks:", "remove task", "change title", "change the status", "change its priority", "change the description", "comments", "assignees")
+                                choice = GF.choose_by_key("[bold italic white]Choose what you want to do to this tasks:", "remove task", "change title", "change the status", "change its priority", "change the description", "comments", "assignees")
                                 if user.getEmail() in [assignee.getEmail() for assignee in task.getAssignees()] or user.getEmail() == project.getLeader().getEmail():
                                     if choice == 0: # remove task
                                         want_to_remove = Confirm.ask("Are you sure you want to remove this task?")
@@ -266,14 +252,16 @@ def load_projects_page(user):
                                         console.print("[green]Description successfullly changed.")
                                     elif choice == 5: # comments
                                         comments = [f'{cm.getPerson().getUsername()}: {cm.getText()}\n' for cm in task.getComments()]
+                                        comments.inser(0, "+ Add a comment on this task\n")
                                         choice = GF.normal_choose("", "+ Add a comment on this task\n", *comments)
                                         if choice == 0:
-                                            console.print(f'Write your comment below here:\n{user.getUsername():}')
+                                            console.print('Write your comment below here:')
+                                            print(f'{user.getUsername()}:')
                                             comment = pr.Comment(input(), user)
                                             task.addComment(comment)
                                             console.print("[green]Comment successfully added.")
                                         else:
-                                            comment = task.getComments()[choice]
+                                            comment = task.getComments()[choice-1]
                                             if task.getComments()[choice].getPerson().getEmail() == user.getEmail(): # This conditition checks if the user is the writer of this comment
                                                 choice1 = GF.choose_by_key("Want do you want to do with this comment?", "edit the comment", "remove the comment")
                                                 if choice1 == 0:
@@ -293,15 +281,13 @@ def load_projects_page(user):
                                                 console.print('Write the email of the assignee you want to add: ')
                                                 assi_email = input()
                                                 while True:
-                                                    filename = os.path.join("AllFiles\\Users", f"{email}.json")
+                                                    filename = os.path.join("AllFiles\\Users", f"{assi_email}.json")
                                                     if not os.path.exists(filename):
                                                         console.print('User does not exist! Try another one: ')
                                                         assi_email = input()
                                                     else:
                                                         project.addCollaborator(userlib.User(assi_email, GF.load_the_data(assi_email)["username"], GF.load_the_data(assi_email)["password"], True))
-                                                        console.print("[green]User added to the project")
-                                                        break
-
+                                                        console.print("[green]Assignee added to the task")
                                         else:
                                             assignees = [f'{assi.getUsername()} - {assi.getEmail()}' for assi in task.getAssignees()]
                                             for assignee in assignees:
@@ -310,7 +296,75 @@ def load_projects_page(user):
                                 else:
                                     console.print("You don't have access to this. You aren't an assignee of this task!")
                                     break
-                elif choice == 2: #setting
+                if choice == 0: #collab
+                    os.system('cls')
+                    while True:
+                        choice = GF.choose_by_key("[bold italic white]\nWhat do you want to do with collaborators?" , "see collaborators" , "add collaborator" , "remove collaborator" , "Back")
+                        if choice == 0: # See collabs
+                            os.system('cls')
+                            collab_emails = [collab.getEmail() for collab in project.getCollaborators()]
+                            collaborators = GF.load_the_collaborators_data(*collab_emails)
+                            console.print("[bold italic white]\nHere you can see the collaborators...")
+                            for i in range(len(collaborators)):
+                                console.print(f"{i+1}. [bold purple4]{collaborators[i]["username"]} - {collaborators[i]["email"]}")
+                            GF.prompt()
+                        elif choice == 1: #add collab
+                            os.system('cls')
+                            console = Console()
+                            login_sys = userlib.Login()
+                            if user.getEmail() == project.getLeader().getEmail():
+                                console.print("Enter the collabrator's email: ", style="bold purple4")
+                                email = input()
+                                for attempt in range(5):
+                                    try:
+                                        if login_sys.correct_email(email):
+                                            filename = os.path.join("AllFiles/Users", f"{email}.json")
+                                            with open(filename, 'r') as file:
+                                                data = json.load(file)
+                                            username = data.get("username")
+                                            password = data.get("password")
+                                            new_collaborator = userlib.User(email , username , password, True)
+                                            project.save_to_file(new_collaborator)
+                                            project.addCollaborator(new_collaborator)
+                                            console.print("[bold purple4]You have successfully added a new collaborator")
+                                            GF.prompt()
+                                            break
+                                    except ValueError as error:
+                                        os.system('cls')
+                                        console.print(error, style="red")
+                                        console.print("[bold purple4]Enter the email: [/]")
+                                        email = input()
+                                    except FileExistsError as error:
+                                        os.system('cls')
+                                        console.print(error, style="red")
+                                        console.print("[bold purple4]Enter the email: [/]")
+                                        email = input()
+                            else:
+                                console.print("You are not the leader. You cannot add anyone to the project")
+                                break
+                        elif choice == 2: #remove collab
+                            os.system('cls')
+                            if user.getEmail() == project.getLeader().getEmail():
+                                collab_emails = [collab.getEmail() for collab in project.getCollaborators()]
+                                collab_emails.append("Back")
+                                choice = GF.normal_choose("[bold italic white]\nWhich one of the collaborators do you want to remove from the project?", *collab_emails)
+                                print(choice)
+                                if choice == len(collab_emails)-1:
+                                    break
+                                else:
+                                    if choice != 0:
+                                        collab = project.getCollaborators()[choice]
+                                        project.removeCollaborator(collab)
+                                        project.remove_from_file(collab) #بعلاوه یک میکنیم چون نمیخوایم خود لیدر هم حساب بشه
+                                        console.print("[bold purple4]You have successfully removed a collaborator")
+                                    else:
+                                        console.print("You can't remove yourself from your own project!")
+                            else:
+                                console.print("You are not the leader. You cannot remove anyone from the project")
+                                break
+                        elif choice == 3:
+                            break
+                elif choice == 1: #setting
                     os.system('cls')
                     while True:
                         choice = GF.choose_by_key("[bold italic white]\nWhat do you want to do?" , "see information" , "Change information" , "Back")
@@ -345,7 +399,7 @@ def load_projects_page(user):
                         elif choice == 2:
                             os.system('cls')
                             break
-                elif choice == 3:
+                elif choice == 2:
                     os.system('cls')
                     break
 
