@@ -1,4 +1,4 @@
-import os, json, GlobalFunctions as GF, ProjectDisplay as PD
+import os, json, GlobalFunctions as GF #, ProjectDisplay as PD
 from rich.console import Console
 import user as userlib
 import projects as pr, time, sys

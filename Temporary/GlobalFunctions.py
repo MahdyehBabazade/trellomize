@@ -2,6 +2,7 @@ from rich.console import Console
 from rich.panel  import Panel
 from rich.layout import Layout
 from rich.text import Text
+import projects as pr
 import os, sys, msvcrt, json, logging
 
 def prompt():
