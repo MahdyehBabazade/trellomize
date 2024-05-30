@@ -12,7 +12,7 @@ def prompt():
 def log_actions(user):
 
     directory = "AllFiles\\Logs"
-    if not os.path.exists(user.getEmail()):
+    if not os.path.exists(directory):
             os.makedirs(directory)
 
     logging.basicConfig(

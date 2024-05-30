@@ -14,6 +14,7 @@ def menu():
         login_page()
     
 def signup_page():
+    
     os.system('cls')
     console = Console()
     signup_sys = userlib.SignUp()
@@ -139,7 +140,7 @@ def new_project_page(user): #COMPLETEDDDDDDDD
     my_project = pr.Project(title, user)
     my_project.save_to_file(user)
     while True:
-        want_collab =Prompt.ask("Wanna add any collaborators?" , choices = ["y"/"n"])
+        want_collab =Prompt.ask("Wanna add any collaborators? (y/n)")
         if want_collab == "y":
             login_sys = userlib.Login()
             if user.getEmail() == my_project.getLeader().getEmail():
@@ -181,7 +182,6 @@ def new_project_page(user): #COMPLETEDDDDDDDD
     log_user.warning(f"user created a new project by title {title} successfully")
 
 def load_projects_page(user):
-    log_user = GF.log_actions(user)
     console = Console()
     data = GF.load_the_data(user.getEmail())
     if "projects" not in data:
@@ -496,7 +496,7 @@ def logout_page(user):
     if choice == 0:
         console = Console()
         console.print('You log out successfully.')
-        log_user.info(f"user logged out")
+        log_user.info("user logged out")
         GF.prompt()
         menu()
     elif choice == 1:
@@ -523,7 +523,7 @@ def task_page(user, project):
         description = Prompt.ask('Write a description for your task')
         task.changeDescription(description)
     console.print(f'Task created in {pr.Status(status).name}', justify="center")
-    log_user.info(f" user created {task.getTitle} task to {project.getTitle} project")
+    log_user.info(f" user created {task.getTitle()} task to {project.getTitle()} project")
     GF.prompt()
     your_account_page(user)
 
@@ -549,7 +549,7 @@ def task_page_by_status(user, project, status=pr.Status.BACKLOG): # COMPLETEDDDD
         description = Prompt.ask('Write a description for your task: ')
         task.changeDescription(description)
     console.print(f'Task created in {pr.Status(status).name}.', justify="center")
-    log_user.info(f" user created {task.getTitle} task to {project.getTitle} project")
+    log_user.info(f" user created {task.getTitle()} task to {project.getTitle()} project")
     GF.prompt()
     your_account_page(user)
 
