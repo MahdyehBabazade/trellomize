@@ -224,7 +224,7 @@ class Task:
             'assignees' : [assignee.to_dict() for assignee in self.__assignees]
         }
 
-def load_from_file(project_id, user):  #maybe it has error too
+def load_from_file(project_id, user):
     directory = "AllFiles\\Users"
     filename = os.path.join(directory, f"{user.getEmail()}.json")
     if os.path.exists(filename):

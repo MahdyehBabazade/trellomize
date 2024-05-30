@@ -151,13 +151,13 @@ def new_project_page(user): #COMPLETEDDDDDDDD
                         if login_sys.correct_email(email):
                             break
                     except ValueError as error:
-                        log_user.warning(f"user gives value error while adding collab to {title} project")
+                        log_user.warning(f"user takes value error while adding collab to {title} project")
                         os.system('cls')
                         console.print(error, style="red")
                         console.print("[bold purple4]Enter the email: [/]")
                         email = input()
                     except FileExistsError as error:
-                        log_user.warning(f"user gives file exist error while adding collab to {title} project")
+                        log_user.warning(f"user takes file exist error while adding collab to {title} project")
                         os.system('cls')
                         console.print(error, style="red")
                         console.print("[bold purple4]Enter the email: [/]")
@@ -171,7 +171,7 @@ def new_project_page(user): #COMPLETEDDDDDDDD
                 my_project.save_to_file(new_collaborator)
                 my_project.addCollaborator(new_collaborator)
                 console.print("[bold purple4]You have successfully added a new collaborator")
-                log_user.warning(f"user added a new collaborator by email {email} to {title} project")
+                log_user.info(f"user added a new collaborator by email {email} to {title} project")
                 GF.prompt()
         elif want_collab == "n":
             break
@@ -179,13 +179,14 @@ def new_project_page(user): #COMPLETEDDDDDDDD
             console.print("invalid letter!", style="red")
     choice = GF.choose_by_key_with_kwargs(Text(title, justify="center"), BACKLOG='', TODO='', DOING='', DONE='', ARCHIVED='')
     task_page_by_status(user, my_project, choice+1)
-    log_user.warning(f"user created a new project by title {title} successfully")
+    log_user.info(f"user created a new project by title {title} successfully")
 
 def load_projects_page(user):
     console = Console()
     data = GF.load_the_data(user.getEmail())
     if "projects" not in data:
-        console.print("No projects ever created. Try creating one.")
+        os.system('cls')
+        console.print("No projects ever created. Try creating one." , style="red")
         GF.prompt()
         your_account_page(user)
     else:
@@ -228,7 +229,7 @@ def load_projects_page(user):
                         if task.getStatus() == 5:
                             archiveds += f"{task.getTitle()}\n"
                     pd_choice = GF.switch_panels(GF.create_layout(project), ["BACKLOG", "TODO", "DOING", "DONE", "ARCHIVED"], [backlogs, todos, doings, dones, archiveds])
-                    tasks = [task for task in project.getTasks() if pd_choice+1 == task.getStatus()]
+                    tasks = [task for task in project.getTasks() if pd_choice + 1 == task.getStatus()]
                     while True:
                         os.system('cls')
                         tasks_title_and_id = [task.getTitle()+' - '+ task.getTaskID() for task in tasks]
@@ -239,10 +240,10 @@ def load_projects_page(user):
                         if choice == len(tasks_title_and_id) - 1: 
                             break
                         elif choice == 0: #want to add task
-                            task_page_by_status(user, project, tasks[pd_choice].getStatus())
+                            task_page_by_status(user, project, tasks[choice - 1].getStatus())
                         else:
                             task = tasks[choice-1]
-                            choice = GF.choose_by_key("[bold italic white]Choose what you want to do to this tasks:", "remove task", "change title", "change the status", "change its priority", "change the description", "comments", "assignees")
+                            choice = GF.choose_by_key(f"[bold italic white]Choose what you want to do to {task.getTitle()} tasks:", "remove task", "change title", "change the status", "change its priority", "change the description", "comments", "assignees")
                             if user.getEmail() in [assignee.getEmail() for assignee in task.getAssignees()] or user.getEmail() == project.getLeader().getEmail():
                                 if choice == 0: # remove task
                                     want_to_remove = Confirm.ask("Are you sure you want to remove this task?")
@@ -254,25 +255,25 @@ def load_projects_page(user):
                                     console.print(f"This tasks' title: {task.getTitle()}\nEnter the new title: ")
                                     task.changeTitle(input())
                                     console.print("[green]Title successfullly changed.")
-                                    log_user.warning(f"user changed {task.getTitle()} title from {project_title} project")
+                                    log_user.info(f"user changed {task.getTitle()} title from {project_title} project")
                                 elif choice == 2: # change the status
-                                    choice = GF.choose_by_key(f"This tasks' status: {pr.Status(task.getStatus()).name}\nI want to move this task to the: ", "BACKLOG", "TODO", "DOING", "DONE", "ARCHIEVED")
+                                    choice = GF.choose_by_key(f"This task's status: {pr.Status(task.getStatus()).name}\nI want to move this task to the: ", "BACKLOG", "TODO", "DOING", "DONE", "ARCHIEVED")
                                     task.changeStatus(pr.Status(choice+1).value)
                                     console.print("[green]Status successfullly changed.")
-                                    log_user.warning(f"user changed {task.getTitle()} status from {project_title} project")
+                                    log_user.info(f"user changed {task.getTitle()} status from {project_title} project")
                                 elif choice == 3: # change the priority
                                     choice = GF.choose_by_key(f"This tasks' priority: {pr.Priority(task.getStatus()).name}\nChange its priority to:", "LOW", "MEDIUM", "HIGH", "CRITICAL")
                                     task.changePriority(pr.Priority(choice+1).value)
                                     console.print("[green]Priority successfullly changed.")
-                                    log_user.warning(f"user changed {task.getTitle()} priority from {project_title} project")
+                                    log_user.info(f"user changed {task.getTitle()} priority from {project_title} project")
                                 elif choice == 4: # change the description
                                     console.print(f"This tasks' description: {task.getDescription()}\nWrite the new description here:")
                                     task.changeDescription(input())
                                     console.print("[green]Description successfullly changed.")
-                                    log_user.warning(f"user changed {task.getTitle()} description from {project_title} project")
+                                    log_user.info(f"user changed {task.getTitle()} description from {project_title} project")
                                 elif choice == 5: # comments
                                     comments = [f'{cm.getPerson().getUsername()}: {cm.getText()}\n' for cm in task.getComments()]
-                                    comments.inser(0, "+ Add a comment on this task\n")
+                                    comments.insert(0, "+ Add a comment on this task\n")
                                     choice = GF.normal_choose("", "+ Add a comment on this task\n", *comments)
                                     if choice == 0:
                                         console.print('Write your comment below here:')
@@ -280,7 +281,7 @@ def load_projects_page(user):
                                         comment = pr.Comment(input(), user)
                                         task.addComment(comment)
                                         console.print("[green]Comment successfully added.")
-                                        log_user.warning(f"user added comment to {task.getTitle()} task from {project_title} project")
+                                        log_user.info(f"user added comment to {task.getTitle()} task from {project_title} project")
                                     else:
                                         comment = task.getComments()[choice-1]
                                         if task.getComments()[choice].getPerson().getEmail() == user.getEmail(): # This conditition checks if the user is the writer of this comment
@@ -289,17 +290,17 @@ def load_projects_page(user):
                                                 comment = pr.Comment()
                                                 console.print(f'Current comment text: {task.getComments()[choice].getText()}\nEnter the new text for this comment: ')
                                                 # بقیه اش کو؟
-                                                log_user.warning(f"user edited a comment from {task.getTitle()} task from {project_title} project")
+                                                log_user.info(f"user edited a comment from {task.getTitle()} task from {project_title} project")
                                             if choice1 == 1:
                                                 want_to_remove = Confirm.ask("Are you sure you want to remove this comment?")
                                                 if want_to_remove:
                                                     task.deleteComment(task.getComments()[choice])
-                                                log_user.warning(f"user remove a comment from {task.getTitle()} task from {project_title} project")
+                                                log_user.info(f"user remove a comment from {task.getTitle()} task from {project_title} project")
                                         else:
                                             console.print(f'The text of the comment: {task.getComments()[choice].getText()}\nWho posted it: {task.getComments()[choice].getPerson().getUsername()} ({task.getComments()[choice].getPerson().getEmail()})')
                                 elif choice == 6: #assignees
                                     assignees = [f'{assi.getUsername()} - {assi.getEmail()}' for assi in task.getAssignees()]
-                                    if user.getEmail() == project.getproject.getLeader().getEmail():
+                                    if user.getEmail() == project.getLeader().getEmail():  # this had error project.getProject? and still have error
                                         choice = GF.choose_by_key("", "+ Add an assignee for this task", *assignees)
                                         if choice == 0:
                                             console.print('Write the email of the assignee you want to add: ')
@@ -309,11 +310,11 @@ def load_projects_page(user):
                                                 if not os.path.exists(filename):
                                                     console.print('User does not exist! Try another one: ')
                                                     assi_email = input()
-                                                    log_user.warning(f"user gives an file not exist error while adding assignees from {task.getTitle()} task from {project_title} project")
+                                                    log_user.warning(f"user takes an file not exist error while adding assignees from {task.getTitle()} task from {project_title} project")
                                                 else:
                                                     project.addCollaborator(userlib.User(assi_email, GF.load_the_data(assi_email)["username"], GF.load_the_data(assi_email)["password"], True))
                                                     console.print("[green]Assignee added to the task")
-                                                    log_user.warning(f"user add a assignee from {task.getTitle()} task from {project_title} project")
+                                                    log_user.info(f"user add a assignee from {task.getTitle()} task from {project_title} project")
                                     else:
                                         assignees = [f'{assi.getUsername()} - {assi.getEmail()}' for assi in task.getAssignees()]
                                         for assignee in assignees:
@@ -321,7 +322,7 @@ def load_projects_page(user):
                                 GF.prompt()
                             else:
                                 console.print("You don't have access to this. You aren't an assignee of this task!")
-                                log_user.warning(f"user gives an error you are not available to add assignees to {task.getTitle()} task from {project_title} project")
+                                log_user.warning(f"user takes an error you are not available to add assignees to {task.getTitle()} task from {project_title} project")
                                 break
                 elif choice == 1: #collab
                     os.system('cls')
@@ -354,24 +355,24 @@ def load_projects_page(user):
                                             project.save_to_file(new_collaborator)
                                             project.addCollaborator(new_collaborator)
                                             console.print("[bold purple4]You have successfully added a new collaborator")
-                                            log_user.warning(f"user added a new collaborator by email {email} to {title} project")
+                                            log_user.info(f"user added a new collaborator by email {email} to {title} project")
                                             GF.prompt()
                                             break
                                     except ValueError as error:
-                                        log_user.warning(f"user gives value error while adding collab to {title} project")
+                                        log_user.warning(f"user takes value error while adding collab to {title} project")
                                         os.system('cls')
                                         console.print(error, style="red")
                                         console.print("[bold purple4]Enter the email: [/]")
                                         email = input()
                                     except FileExistsError as error:
-                                        log_user.warning(f"user gives file exists error while adding collab to {title} project")
+                                        log_user.warning(f"user takes file exists error while adding collab to {title} project")
                                         os.system('cls')
                                         console.print(error, style="red")
                                         console.print("[bold purple4]Enter the email: [/]")
                                         email = input()
                             else:
                                 console.print("You are not the leader. You cannot add anyone to the project")
-                                log_user.warning(f"user gives an error you are not available to add collab to {project_title} project")
+                                log_user.warning(f"user takes an error you are not available to add collab to {project_title} project")
                                 break
                         elif choice == 2: #remove collab
                             os.system('cls')
@@ -388,12 +389,12 @@ def load_projects_page(user):
                                         project.removeCollaborator(collab)
                                         project.remove_from_file(collab) #بعلاوه یک میکنیم چون نمیخوایم خود لیدر هم حساب بشه
                                         console.print("[bold purple4]You have successfully removed a collaborator")
-                                        log_user.warning(f"user has removed a collab from {project_title} project")
+                                        log_user.info(f"user has removed a collab from {project_title} project")
                                     else:
                                         console.print("You can't remove yourself from your own project!")
                             else:
                                 console.print("You are not the leader. You cannot remove anyone from the project")
-                                log_user.warning(f"user gives an error that you are not availabe to remove anyone from {project_title} project")
+                                log_user.warning(f"user takes an error that you are not availabe to remove anyone from {project_title} project")
                                 break
                         elif choice == 3:
                             break
@@ -419,14 +420,14 @@ def load_projects_page(user):
                                     new_title = input()
                                     project.changeTitle(new_title)
                                     console.print("[bold purple4]Your title has been successfully changed!")
-                                    log_user.warning(f"user has changed {project_title} project's title")
+                                    log_user.info(f"user has changed {project_title} project's title")
                                     GF.prompt()
                                 elif choice4 == 1:
                                     os.system('cls')
                                     new_id = input("[bold italic white]\nEnter your new id :")
                                     project.changeProjectId(new_id)
                                     console.print("[bold purple4]Your id has been successfully changed!")
-                                    log_user.warning(f"user has changed {project_title} project's id")
+                                    log_user.info(f"user has changed {project_title} project's id")
                                     GF.prompt()
                                 elif choice4 == 2:
                                     os.system('cls')
@@ -452,35 +453,36 @@ def setting(user):
                     break
             except:
                 os.system('cls')
+                log_user.warning("user takes invalid password error while editing profile in setting")
                 console.print("Invalid password"+"\n", style="bold red")
                 console.print("Try again: ")
                 console.print("[bold purple4]Enter your password: [/]")
                 password = input()
-
-        choice = GF.choose_by_key('What do you want to change?' , 'My username' , 'My password' , 'Back')
-        if choice == 0:
-            os.system('cls')
-            console.print("[bold purple4]Enter your new username.")
-            new_username = input()
-            user.changeUsername(new_username)
-            os.system('cls')
-            console.print("\n[bold purple4]Your username has been changed successfully!")
-            log_user.info(f"user has changed his/her username")
-            GF.prompt()
-            setting(user)
-        elif choice == 1:
-            os.system('cls')
-            console.print("[bold purple4]Enter your new password.")
-            new_password = userlib.hashing(input())
-            user.changePassword(new_password)
-            os.system('cls')
-            console.print("\n[bold purple4]Your password has been changed successfully!")
-            log_user.warning(f"user has changed his/her password")
-            GF.prompt()
-            setting(user)
-        elif choice == 2:
-            os.system('cls')
-            setting(user)
+        while True:
+            choice = GF.choose_by_key('What do you want to change?' , 'My username' , 'My password' , 'Back')
+            if choice == 0:
+                os.system('cls')
+                console.print("[bold purple4]Enter your new username.")
+                new_username = input()
+                user.changeUsername(new_username)
+                os.system('cls')
+                console.print("\n[bold purple4]Your username has been changed successfully!")
+                log_user.info(f"user has changed his/her username")
+                GF.prompt()
+                setting(user)
+            elif choice == 1:
+                os.system('cls')
+                console.print("[bold purple4]Enter your new password.")
+                new_password = userlib.hashing(input())
+                user.changePassword(new_password)
+                os.system('cls')
+                console.print("\n[bold purple4]Your password has been changed successfully!")
+                log_user.info(f"user has changed his/her password")
+                GF.prompt()
+                setting(user)
+            elif choice == 2:
+                os.system('cls')
+                break
 
     elif choice == 1:
         logout_page(user)
