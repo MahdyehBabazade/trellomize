@@ -4,6 +4,7 @@ __pycache__/
 myenv/
 *.pyc
 *.json
+*.log
 Temporary/__pycache__/user.cpython-312.pyc
 /Temporary/__pycache__
 Temporary/test.py

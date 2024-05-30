@@ -243,8 +243,6 @@ def load_from_file(project_id, user):
                     task.setComments(task_dict['comments'])
                     project.setTask(task)
                 return project
-    return None
-
 
 class Comment:
     def __init__(self, text, person, time=(datetime.datetime.now()).isoformat()) -> None:

@@ -13,7 +13,7 @@ def log_actions(user):
 
     directory = "AllFiles\\Logs"
     if not os.path.exists(directory):
-            os.makedirs(directory)
+        os.makedirs(directory)
 
     logging.basicConfig(
         filename = os.path.join(directory, f"{user.getEmail()}.log"),
@@ -29,18 +29,18 @@ def choose_by_key_with_kwargs(description="", **kwargs):
     choice = 0
     while True:
         os.system('cls')
-        console.print(description)
+        console.print(description, justify="center")
         for index, (first, second) in enumerate(kwargs.items()):
             if index == current_pos:
-                console.print(Panel(second, title=first), style="purple")
+                console.print(Panel(second, title=first, expand=False), style="purple", justify="center")
             else:
-                console.print(Panel(second, title=first, border_style="bold purple4"))
+                console.print(Panel(second, title=first, expand=False, border_style="bold purple4"), justify="center")
         console.print("Press 'q' to quit.", style="grey69")
         key = msvcrt.getch() # getch returns a byte
-        if (key == b"w" or key == b"H"): # H  is for PgUp
+        if key == b"H": # H  is for PgUp
             current_pos = (current_pos - 1) % len(kwargs)
             
-        elif (key == b"s" or key== b"P"): # P is for PgDn
+        elif key== b"P": # P is for PgDn
             current_pos = (current_pos + 1) % len(kwargs)
         elif key == b"q":
             sys.exit()
@@ -55,18 +55,18 @@ def choose_by_key(description="", *args):   # Overloaded Function
     choice = 0
     while True:
         os.system('cls')
-        console.print(description)
+        console.print(description, justify="center")
         for i in range(len(args)):
             if i == current_pos:
-                console.print(Panel(args[i]), style="purple")
+                console.print(Panel(args[i], expand=False), style="purple", justify="center")
             else:
-                console.print(Panel(args[i], border_style="bold purple4"))
+                console.print(Panel(args[i], expand=False, border_style="bold purple4"), justify="center")
         console.print("Press 'q' to quit.", style="grey69")
         key = msvcrt.getch() # getch returns a byte
-        if (key == b"w" or key == b"H"): # H  is for PgUp
+        if key == b"H": # H  is for PgUp
             current_pos = (current_pos - 1) % len(args)
             
-        elif (key == b"s" or key== b"P"): # P is for PgDn
+        elif key== b"P": # P is for PgDn
             current_pos = (current_pos + 1) % len(args)
         elif key == b"q":
             sys.exit()
@@ -89,10 +89,10 @@ def normal_choose(description="", *args):   # Overloaded Function
                 console.print(f"{i+1}. {args[i]}\n")
         console.print("Press 'q' to quit.", style="grey69")
         key = msvcrt.getch() # getch returns a byte
-        if (key == b"w" or key == b"H"): # H  is for PgUp
+        if key == b"H": # H  is for PgUp
             current_pos = (current_pos - 1) % len(args)
             
-        elif (key == b"s" or key== b"P"): # P is for PgDn
+        elif key== b"P": # P is for PgDn
             current_pos = (current_pos + 1) % len(args)
         elif key == b"q":
             sys.exit()
@@ -130,7 +130,7 @@ def switch_panels(layout, panel_names : list, panel_texts):
     console = Console()
     current_pos = 0
     while True:
-        os.system('cls' if os.name == 'nt' else 'clear') # 'nt' is for windows, I could use it in other cplaces but didn't remember :(
+        os.system('cls' if os.name == 'nt' else 'clear') # 'nt' is for windows, I could use it in other places but didn't remember :(
         for i, name in enumerate(panel_names):
             if i == current_pos:
                 layout[name].update(renderable=Panel(panel_texts[i], title=name, style="purple bold"))
@@ -141,9 +141,9 @@ def switch_panels(layout, panel_names : list, panel_texts):
         key = msvcrt.getch()
         if key == b"q":
             sys.exit()
-        if key == b"w":  # Left arrow
+        if key == b"K":  # Left arrow
             current_pos = (current_pos - 1) % len(panel_names)
-        elif key == b"s":  # Right arrow
+        elif key == b"M":  # Right arrow
             current_pos = (current_pos + 1) % len(panel_names)
         elif key == b"\r": #this is for Enter
             choice = current_pos
@@ -176,22 +176,24 @@ def create_layout(project : pr.Project):
 
     layout = Layout()
     layout.split(
+        Layout(name="space", ratio=2),
         Layout(name='title', ratio=1),  
         Layout(name='first', ratio=12),  
-        Layout(name='second', ratio=16),
     )
-    layout["title"].update(Text(project.getTitle(), justify="center", style="bold magenta"))
+    layout["space"].update(Text(" "))
+    layout["title"].split(
+        Layout(renderable=Text(project.getTitle(), justify="center", style="bold magenta"))
+    )
     
     layout["first"].split(
-    Layout(renderable=Panel(backlogs, title="BACKLOG"), name="BACKLOG"),
-    Layout(renderable=Panel(todos, title="TODO"), name="TODO"),
-    splitter="row"
-    )
-
-    layout["second"].split(
+        Layout(renderable=Text(" ")),
+        Layout(renderable=Panel(backlogs, title="BACKLOG"), name="BACKLOG"),
+        Layout(renderable=Panel(todos, title="TODO"), name="TODO"),
         Layout(renderable=Panel(doings, title="DOING"), name="DOING"),
         Layout(renderable=Panel(dones, title="DONE"), name="DONE"),
         Layout(renderable=Panel(archiveds, title="ARCHIVED"), name="ARCHIVED"),
+        Layout(renderable=Text(" ")),
         splitter="row"
     )
+
     return layout
