@@ -20,6 +20,8 @@ def log_actions(user):
         level = logging.INFO,
         format = '%(asctime)s - %(levelname)s - %(message)s'
     )
+    log = logging.getLogger(user.getEmail())
+    return log
 
 def choose_by_key_with_kwargs(description="", **kwargs):
     console = Console()
@@ -139,9 +141,9 @@ def switch_panels(layout, panel_names : list, panel_texts):
         key = msvcrt.getch()
         if key == b"q":
             sys.exit()
-        if key == b"K":  # Left arrow
+        if key == b"w":  # Left arrow
             current_pos = (current_pos - 1) % len(panel_names)
-        elif key == b"M":  # Right arrow
+        elif key == b"s":  # Right arrow
             current_pos = (current_pos + 1) % len(panel_names)
         elif key == b"\r": #this is for Enter
             choice = current_pos
