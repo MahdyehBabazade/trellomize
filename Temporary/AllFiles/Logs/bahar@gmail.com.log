@@ -1,3 +1,29 @@
 2024-05-30 15:44:55,861 - INFO - user signed up
 2024-05-30 15:46:57,663 - INFO -  user created hi task to hi project
 2024-05-30 19:47:42,893 - INFO -  user created hi task to hi project
+2024-05-31 21:34:11,933 - INFO - user signed up
+2024-05-31 21:34:21,035 - INFO - user created a new project with title b@gmail.com successfully
+2024-05-31 21:35:06,337 - INFO - user logged out
+2024-05-31 21:35:18,257 - INFO - user signed up
+2024-05-31 21:35:26,928 - INFO - user created a new project with title add bahar successfully
+2024-05-31 21:35:33,807 - INFO - user added a new collaborator with email bahar@gmail.com to add bahar project
+2024-05-31 21:35:47,000 - INFO - user logged out
+2024-05-31 21:35:56,874 - INFO - user logged in
+2024-05-31 21:36:15,851 - INFO - user created a new project with title add b successfully
+2024-05-31 21:36:21,512 - INFO - user added a new collaborator with email b@gmail.com to add b project
+2024-05-31 21:38:23,990 - INFO -  user created backlog task to add b project
+2024-05-31 21:39:00,060 - INFO -  user created backlog2 task to add b project
+2024-05-31 21:42:23,395 - INFO - user logged in
+2024-05-31 21:42:38,153 - INFO - user created a new project with title b@ successfully
+2024-05-31 21:42:48,846 - INFO - user added a new collaborator with email b@gmail.com to b@ project
+2024-05-31 21:43:01,926 - INFO - user logged out
+2024-05-31 21:43:10,489 - INFO - user logged in
+2024-05-31 21:43:21,291 - INFO - user created a new project with title add bahar successfully
+2024-05-31 21:43:32,302 - INFO - user added a new collaborator with email bahar@gmail.com to add bahar project
+2024-05-31 21:43:48,318 - INFO - user logged out
+2024-05-31 21:43:58,131 - INFO - user logged in
+2024-05-31 21:44:50,294 - INFO - user created a new project with title b@ successfully
+2024-05-31 21:44:57,340 - INFO - user added a new collaborator with email b@gmail.com to b@ project
+2024-05-31 21:45:04,084 - INFO - user logged out
+2024-05-31 21:45:12,989 - INFO - user logged in
+2024-05-31 21:47:41,181 - INFO - user logged out
