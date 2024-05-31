@@ -459,7 +459,7 @@ def load_collab_projects(user):
             project = pr.load_from_file(project_id, user)
             
             while True:
-                choice = GF.choose_by_key(f"[bold italic white]\nWhat do you want to do with {project.getTitle()} project?", "see the project board" , "collaborators" , "setting of project" , "Back")
+                choice = GF.choose_by_key(f"[bold italic white]\nWhat do you want to do with {project.getTitle()} project?", "see the project board" , "collaborators", "Back")
                 if choice == 0:
                     project_board_page(user, project)
                 elif choice == 1: # See collabs
@@ -471,7 +471,13 @@ def load_collab_projects(user):
                         console.print(f"{i+1}. [bold purple4]{collaborators[i]["username"]} - {collaborators[i]["email"]}")
                     GF.prompt()
                 elif choice == 2: #setting
-                    project_setting(user, project)
+                    os.system('cls')
+                    console.print("[bold italic white]\nHere is the project information :")
+                    console.print(f"[bold purple4]Title : {project.getTitle()}")
+                    console.print(f"[bold purple4]Id : {project.getProjectID()}")
+                    leader = project.getLeader()
+                    console.print(f"[bold purple4]Leader : {leader.getEmail()}")
+                    GF.prompt()
                 elif choice == 3: 
                     os.system('cls')
                     break
@@ -500,19 +506,13 @@ def load_projects_page(user):
             project = pr.load_from_file(project_id, user)
             
             while True:
-                choice = GF.choose_by_key(f"[bold italic white]\nWhat do you want to do with {project.getTitle()} project?", "see the project board" , "collaborators" , "project information" , "Back")
+                choice = GF.choose_by_key(f"[bold italic white]\nWhat do you want to do with {project.getTitle()} project?", "see the project board" , "collaborators" , "project setting" , "Back")
                 if choice == 0:
                     project_board_page(user, project)
                 elif choice == 1: #collab
                     collabs_page(user, project)
                 elif choice == 2: # project info
-                    os.system('cls')
-                    console.print("[bold italic white]\nHere is the project information :")
-                    console.print(f"[bold purple4]Title : {project.getTitle()}")
-                    console.print(f"[bold purple4]Id : {project.getProjectID()}")
-                    leader = project.getLeader()
-                    console.print(f"[bold purple4]Leader : {leader.getEmail()}")
-                    GF.prompt()
+                    project_setting(user, project)
                 elif choice == 3: 
                     os.system('cls')
                     break
