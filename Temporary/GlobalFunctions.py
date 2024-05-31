@@ -126,59 +126,31 @@ def load_the_collaborators_data(*args): # Returns all the collaborators' data in
             data.append(json.load(f))
     return data
 
-def switch_panels(layout, panel_names : list, panel_texts):
-    console = Console()
-    current_pos = 0
-    while True:
-        os.system('cls' if os.name == 'nt' else 'clear') # 'nt' is for windows, I could use it in other places but didn't remember :(
-        for i, name in enumerate(panel_names):
-            if i == current_pos:
-                layout[name].update(renderable=Panel(panel_texts[i], title=name, style="purple bold"))
-            else:
-                layout[name].update(renderable=Panel(panel_texts[i], title=name))
-        console.print(layout)
-        console.print("Press 'q' to quit.", style="grey69")
-        key = msvcrt.getch()
-        if key == b"q":
-            sys.exit()
-        if key == b"K":  # Left arrow
-            current_pos = (current_pos - 1) % len(panel_names)
-        elif key == b"M":  # Right arrow
-            current_pos = (current_pos + 1) % len(panel_names)
-        elif key == b"\r": #this is for Enter
-            choice = current_pos
-            break
-    return choice
             
-def create_layout(project : pr.Project):
+def switch_panels(project: pr.Project):
     console = Console()
     tasks = project.getTasks()
-    backlogs = ""
-    for task in tasks:
+    
+    panels = {"BACKLOG": "", "TODO": "", "DOING": "", "DONE": "", "ARCHIVED": ""}
+    
+    for i,task in enumerate(tasks):
         if task.getStatus() == 1:
-            backlogs += f"{task.getTitle()}\n"
-    todos = ""
-    for task in tasks:
-        if task.getStatus() == 2:
-            todos += f"{task.getTitle()}\n"
-    doings = ""
-    for task in tasks:
-        if task.getStatus() == 3:
-            doings += f"{task.getTitle()}\n"
-    dones = ""
-    for task in tasks:
-        if task.getStatus() == 4:
-            dones += f"{task.getTitle()}\n"
-    archiveds = ""
-    for task in tasks:
-        if task.getStatus() == 5:
-            archiveds += f"{task.getTitle()}\n"
+            panels["BACKLOG"] += f"#{i+1}: {task.getTitle()}\n"
+        elif task.getStatus() == 2:
+            panels["TODO"] += f"{i+1}. {task.getTitle()}\n"
+        elif task.getStatus() == 3:
+            panels["DOING"] += f"{i+1}. {task.getTitle()}\n"
+        elif task.getStatus() == 4:
+            panels["DONE"] += f"{i+1}. {task.getTitle()}\n"
+        elif task.getStatus() == 5:
+            panels["ARCHIVED"] += f"{i+1}. {task.getTitle()}\n"
 
     layout = Layout()
     layout.split(
         Layout(name="space", ratio=2),
-        Layout(name='title', ratio=1),  
-        Layout(name='first', ratio=12),  
+        Layout(name='title', ratio=1),
+        Layout(name='first', ratio=12),
+        Layout(name='last', ratio=1)
     )
     layout["space"].update(Text(" "))
     layout["title"].split(
@@ -187,13 +159,42 @@ def create_layout(project : pr.Project):
     
     layout["first"].split(
         Layout(renderable=Text(" ")),
-        Layout(renderable=Panel(backlogs, title="BACKLOG"), name="BACKLOG"),
-        Layout(renderable=Panel(todos, title="TODO"), name="TODO"),
-        Layout(renderable=Panel(doings, title="DOING"), name="DOING"),
-        Layout(renderable=Panel(dones, title="DONE"), name="DONE"),
-        Layout(renderable=Panel(archiveds, title="ARCHIVED"), name="ARCHIVED"),
+        *[Layout(renderable=Panel(panels[name], title=name), name=name) for name in panels],
+        Layout(renderable=Text(" ")),
+        splitter="row"
+    )
+    layout["last"].split(
+        Layout(renderable=Text(" ")),
+        Layout(renderable=Panel(Text("Back", justify="center")), name="Back"),
         Layout(renderable=Text(" ")),
         splitter="row"
     )
 
-    return layout
+    current_pos = 0
+    while True:
+        os.system('cls' if os.name == 'nt' else 'clear')
+        for i, name in enumerate(list(panels.keys()) + ["Back"]):
+            if i == current_pos:
+                if i != 5:
+                    layout[name].update(renderable=Panel(panels.get(name, "Back"), title=name, style="purple bold"))
+                else:
+                    layout[name].update(renderable=Panel(Text(panels.get(name, "Back"), justify="center"), title="", style="purple bold"))
+            else:
+                if i != 5:
+                    layout[name].update(renderable=Panel(panels.get(name, "Back"), title=name))
+                else:
+                    layout[name].update(renderable=Panel(Text(panels.get(name, "Back"), justify="center"), title=""))
+        console.print(layout)
+        console.print("Press 'q' to quit.", style="grey69")
+        key = msvcrt.getch()
+        if key == b'q':
+            sys.exit()
+        elif key == b'K':  # Left arrow
+            current_pos = (current_pos - 1) % (len(panels) + 1)
+        elif key == b'M':  # Right arrow
+            current_pos = (current_pos + 1) % (len(panels) + 1)
+        elif key == b'\r':  # Enter
+            choice = current_pos
+            break
+
+    return choice

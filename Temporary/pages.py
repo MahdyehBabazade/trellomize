@@ -174,8 +174,8 @@ def new_project_page(user): #COMPLETEDDDDDDDD
         console.print("[bold purple4]You have successfully added a new collaborator")
         log_user.info(f"user added a new collaborator by email {email} to {title} project")
         GF.prompt()
-    choice = GF.choose_by_key_with_kwargs(Text(title, justify="center"), BACKLOG='', TODO='', DOING='', DONE='', ARCHIVED='')
-    task_page_by_status(user, my_project, choice+1)
+    status = Prompt.ask("What is the status of this task?", choices=["BACKLOG", "TODO", "DOING", "DONE", "ARCHIVED"])
+    task_page_by_status(user, my_project, pr.Status[status].value)
 
 def project_board_page(user, project):
     log_user = GF.log_actions(user)
@@ -200,121 +200,124 @@ def project_board_page(user, project):
     for i, task in enumerate(project.getTasks()):
         if task.getStatus() == 5:
             archiveds += f"{i+1}. {task.getTitle()}\n"
-    pd_choice = GF.switch_panels(GF.create_layout(project), ["BACKLOG", "TODO", "DOING", "DONE", "ARCHIVED"], [backlogs, todos, doings, dones, archiveds])
-    tasks = [task for task in project.getTasks() if pd_choice + 1 == task.getStatus()]
+    pd_choice = GF.switch_panels(project)
     while True:
         os.system('cls')
-        tasks_title_and_id = [task.getTitle()+' - '+ task.getTaskID() for task in tasks]
-        tasks_title_and_id.insert(0, "+ Add a task on this project")
-        tasks_title_and_id.append("Back")
-        #while True:
-        choice = GF.choose_by_key("", *tasks_title_and_id)
-        if choice == len(tasks_title_and_id) - 1: 
+        if pd_choice == 5:
             break
-        elif choice == 0: #want to add task
-            task_page_by_status(user, project, pd_choice+1)
         else:
-            task = tasks[choice-1]
-            console.print(task.getTitle(), justify="center", style="purple italic")
-            choice = GF.choose_by_key(f"[bold italic white]Choose what you want to do to {task.getTitle()} tasks:", "remove task", "change title", "change the status", "change its priority", "change the description", "comments", "assignees")
-            if user.getEmail() in [assignee.getEmail() for assignee in task.getAssignees()] or user.getEmail() == project.getLeader().getEmail():
-                if choice == 0: # remove task
-                    want_to_remove = Confirm.ask("Are you sure you want to remove this task?")
-                    if want_to_remove:
-                        project.removeTask(task)
-                        console.print('Task successfully deleted.')
-                        log_user.info(f"user remove {task.getTitle()} task from {project.getTitle()} project")
-                elif choice == 1: # change title
-                    console.print(f"This tasks' title: {task.getTitle()}\nEnter the new title: ")
-                    task.changeTitle(input())
-                    console.print("[green]Title successfullly changed.")
-                    log_user.info(f"user changed {task.getTitle()} title from {project.getTitle()} project")
-                elif choice == 2: # change the status
-                    choice = GF.choose_by_key(f"This task's status: {pr.Status(task.getStatus()).name}\nI want to move this task to the: ", "BACKLOG", "TODO", "DOING", "DONE", "ARCHIEVED")
-                    task.changeStatus(pr.Status(choice+1).value)
-                    console.print("[green]Status successfullly changed.")
-                    log_user.info(f"user changed {task.getTitle()} status from {project.getTitle()} project")
-                elif choice == 3: # change the priority
-                    choice = GF.choose_by_key(f"This tasks' priority: {pr.Priority(task.getStatus()).name}\nChange its priority to:", "LOW", "MEDIUM", "HIGH", "CRITICAL")
-                    task.changePriority(pr.Priority(choice+1).value)
-                    console.print("[green]Priority successfullly changed.")
-                    log_user.info(f"user changed {task.getTitle()} priority from {project.getTitle()} project")
-                elif choice == 4: # change the description
-                    console.print(f"This tasks' description: {task.getDescription()}\nWrite the new description here:")
-                    task.changeDescription(input())
-                    console.print("[green]Description successfullly changed.")
-                    log_user.info(f"user changed {task.getTitle()} description from {project.getTitle()} project")
-                elif choice == 5: # comments
-                    comments = [f'{cm.getPerson().getUsername()}: {cm.getText()}\n' for cm in task.getComments()]
-                    comments.insert(0, "+ Add a comment on this task\n")
-                    choice = GF.normal_choose("", *comments)
-                    if choice == 0:
-                        console.print('Write your comment below here:')
-                        print(f'{user.getUsername()}:')
-                        comment = pr.Comment(input(), user)
-                        task.addComment(comment)
-                        console.print("[green]Comment successfully added.")
-                        log_user.info(f"user added comment to {task.getTitle()} task from {project.getTitle()} project")
-                    else:
-                        comment = task.getComments()[choice-1]
-                        if task.getComments()[choice].getPerson().getEmail() == user.getEmail(): # This conditition checks if the user is the writer of this comment
-                            choice1 = GF.choose_by_key("Want do you want to do with this comment?", "edit the comment", "remove the comment")
-                            if choice1 == 0:
-                                console.print(f'Current comment text: {task.getComments()[choice].getText()}\nEnter the new text for this comment: ')
-                                text = input()
-                                comment = pr.Comment(text, user)
-                                # بقیه اش کو؟
-                                log_user.info(f"user edited a comment from {task.getTitle()} task from {project.getTitle()} project")
-                            if choice1 == 1:
-                                want_to_remove = Confirm.ask("Are you sure you want to remove this comment?")
-                                if want_to_remove:
-                                    task.deleteComment(task.getComments()[choice])
-                                log_user.info(f"user remove a comment from {task.getTitle()} task from {project.getTitle()} project")
-                        else:
-                            console.print(f'The text of the comment: {task.getComments()[choice].getText()}\nWho posted it: {task.getComments()[choice].getPerson().getUsername()} ({task.getComments()[choice].getPerson().getEmail()})')
-                elif choice == 6: #assignees
-                    assignees = [f'{assi.getUsername()} - {assi.getEmail()}' for assi in task.getAssignees()]
-                    if user.getEmail() == project.getLeader().getEmail():  # this had error project.getProject? and still have error
-                        choice = GF.choose_by_key("", "+ Add an assignee for this task", *assignees)
-                        if choice == 0:
-                            console.print('Write the email of the assignee you want to add: ')
-                            assi_email = input()
-                            while True:
-                                filename = os.path.join("AllFiles\\Users", f"{assi_email}.json")
-                                if not os.path.exists(filename):
-                                    console.print('User does not exist! Try another one: ')
-                                    assi_email = input()
-                                    log_user.warning(f"user takes a file not exist error while adding assignees from {task.getTitle()} task from {project.getTitle()} project")
-                                else:
-                                    project.addCollaborator(userlib.User(assi_email, GF.load_the_data(assi_email)["username"], GF.load_the_data(assi_email)["password"], True))
-                                    console.print("[green]Assignee added to the task")
-                                    log_user.info(f"user add a assignee from {task.getTitle()} task from {project.getTitle()} project")
-                    else:
-                        assignees = [f'{assi.getUsername()} - {assi.getEmail()}' for assi in task.getAssignees()]
-                        for assignee in assignees:
-                            console.print(assignee)
-                GF.prompt()
-            else:
-                if choice == 5: # comments
-                    comments = [f'{cm.getPerson().getUsername()}: {cm.getText()}\n' for cm in task.getComments()]
-                    choice = GF.normal_choose("", "+ Add a comment on this task", "Back")
-                    if choice == 0:
-                        console.print('Write your comment below here:')
-                        print(f'{user.getUsername()}:')
-                        comment = pr.Comment(input(), user)
-                        task.addComment(comment)
-                        console.print("[green]Comment successfully added.")
-                        log_user.info(f"user added comment to {task.getTitle()} task from {project.getTitle()} project")
-                    else: 
-                        break
-                elif choice == 6:
-                    for i, assi in enumerate(task.getAssignees()):
-                        console.print(f"{i+1}. {assi.getUsername()} - {assi.getEmail()}")
-                else:
-                    console.print("You don't have access to this. You aren't an assignee of this task!")
-                    log_user.warning(f"user takes an error you are not available to add assignees to {task.getTitle()} task from {project.getTitle()} project")
-                GF.prompt()
+            tasks = [task for task in project.getTasks() if pd_choice + 1 == task.getStatus()]
+            tasks_title_and_id = [task.getTitle()+' - '+ task.getTaskID() for task in tasks]
+            tasks_title_and_id.insert(0, "+ Add a task on this project")
+            tasks_title_and_id.append("Back")
+            #while True:
+            choice = GF.choose_by_key("", *tasks_title_and_id)
+            if choice == len(tasks_title_and_id) - 1: 
                 break
+            elif choice == 0: #want to add task
+                task_page_by_status(user, project, pd_choice+1)
+            else:
+                task = tasks[choice-1]
+                console.print(task.getTitle(), justify="center", style="purple italic")
+                choice = GF.choose_by_key(f"[bold italic white]Choose what you want to do to {task.getTitle()} tasks:", "remove task", "change title", "change the status", "change its priority", "change the description", "comments", "assignees")
+                if user.getEmail() in [assignee.getEmail() for assignee in task.getAssignees()] or user.getEmail() == project.getLeader().getEmail():
+                    if choice == 0: # remove task
+                        want_to_remove = Confirm.ask("Are you sure you want to remove this task?")
+                        if want_to_remove:
+                            project.removeTask(task)
+                            console.print('Task successfully deleted.')
+                            log_user.info(f"user remove {task.getTitle()} task from {project.getTitle()} project")
+                    elif choice == 1: # change title
+                        console.print(f"This tasks' title: {task.getTitle()}\nEnter the new title: ")
+                        task.changeTitle(input())
+                        console.print("[green]Title successfullly changed.")
+                        log_user.info(f"user changed {task.getTitle()} title from {project.getTitle()} project")
+                    elif choice == 2: # change the status
+                        choice = GF.choose_by_key(f"This task's status: {pr.Status(task.getStatus()).name}\nI want to move this task to the: ", "BACKLOG", "TODO", "DOING", "DONE", "ARCHIEVED")
+                        task.changeStatus(pr.Status(choice+1).value)
+                        console.print("[green]Status successfullly changed.")
+                        log_user.info(f"user changed {task.getTitle()} status from {project.getTitle()} project")
+                    elif choice == 3: # change the priority
+                        choice = GF.choose_by_key(f"This tasks' priority: {pr.Priority(task.getStatus()).name}\nChange its priority to:", "LOW", "MEDIUM", "HIGH", "CRITICAL")
+                        task.changePriority(pr.Priority(choice+1).value)
+                        console.print("[green]Priority successfullly changed.")
+                        log_user.info(f"user changed {task.getTitle()} priority from {project.getTitle()} project")
+                    elif choice == 4: # change the description
+                        console.print(f"This tasks' description: {task.getDescription()}\nWrite the new description here:")
+                        task.changeDescription(input())
+                        console.print("[green]Description successfullly changed.")
+                        log_user.info(f"user changed {task.getTitle()} description from {project.getTitle()} project")
+                    elif choice == 5: # comments
+                        comments = [f'{cm.getPerson().getUsername()}: {cm.getText()}\n' for cm in task.getComments()]
+                        comments.insert(0, "+ Add a comment on this task\n")
+                        choice = GF.normal_choose("", *comments)
+                        if choice == 0:
+                            console.print('Write your comment below here:')
+                            print(f'{user.getUsername()}:')
+                            comment = pr.Comment(input(), user)
+                            task.addComment(comment)
+                            console.print("[green]Comment successfully added.")
+                            log_user.info(f"user added comment to {task.getTitle()} task from {project.getTitle()} project")
+                        else:
+                            comment = task.getComments()[choice-1]
+                            if task.getComments()[choice].getPerson().getEmail() == user.getEmail(): # This conditition checks if the user is the writer of this comment
+                                choice1 = GF.choose_by_key("Want do you want to do with this comment?", "edit the comment", "remove the comment")
+                                if choice1 == 0:
+                                    console.print(f'Current comment text: {task.getComments()[choice].getText()}\nEnter the new text for this comment: ')
+                                    text = input()
+                                    comment = pr.Comment(text, user)
+                                    # بقیه اش کو؟
+                                    log_user.info(f"user edited a comment from {task.getTitle()} task from {project.getTitle()} project")
+                                if choice1 == 1:
+                                    want_to_remove = Confirm.ask("Are you sure you want to remove this comment?")
+                                    if want_to_remove:
+                                        task.deleteComment(task.getComments()[choice])
+                                    log_user.info(f"user remove a comment from {task.getTitle()} task from {project.getTitle()} project")
+                            else:
+                                console.print(f'The text of the comment: {task.getComments()[choice].getText()}\nWho posted it: {task.getComments()[choice].getPerson().getUsername()} ({task.getComments()[choice].getPerson().getEmail()})')
+                    elif choice == 6: #assignees
+                        assignees = [f'{assi.getUsername()} - {assi.getEmail()}' for assi in task.getAssignees()]
+                        if user.getEmail() == project.getLeader().getEmail():  # this had error project.getProject? and still have error
+                            choice = GF.choose_by_key("", "+ Add an assignee for this task", *assignees)
+                            if choice == 0:
+                                console.print('Write the email of the assignee you want to add: ')
+                                assi_email = input()
+                                while True:
+                                    filename = os.path.join("AllFiles\\Users", f"{assi_email}.json")
+                                    if not os.path.exists(filename):
+                                        console.print('User does not exist! Try another one: ')
+                                        assi_email = input()
+                                        log_user.warning(f"user takes a file not exist error while adding assignees from {task.getTitle()} task from {project.getTitle()} project")
+                                    else:
+                                        project.addCollaborator(userlib.User(assi_email, GF.load_the_data(assi_email)["username"], GF.load_the_data(assi_email)["password"], True))
+                                        console.print("[green]Assignee added to the task")
+                                        log_user.info(f"user add a assignee from {task.getTitle()} task from {project.getTitle()} project")
+                        else:
+                            assignees = [f'{assi.getUsername()} - {assi.getEmail()}' for assi in task.getAssignees()]
+                            for assignee in assignees:
+                                console.print(assignee)
+                    GF.prompt()
+                else:
+                    if choice == 5: # comments
+                        comments = [f'{cm.getPerson().getUsername()}: {cm.getText()}\n' for cm in task.getComments()]
+                        choice = GF.normal_choose("", "+ Add a comment on this task", "Back")
+                        if choice == 0:
+                            console.print('Write your comment below here:')
+                            print(f'{user.getUsername()}:')
+                            comment = pr.Comment(input(), user)
+                            task.addComment(comment)
+                            console.print("[green]Comment successfully added.")
+                            log_user.info(f"user added comment to {task.getTitle()} task from {project.getTitle()} project")
+                        else: 
+                            break
+                    elif choice == 6:
+                        for i, assi in enumerate(task.getAssignees()):
+                            console.print(f"{i+1}. {assi.getUsername()} - {assi.getEmail()}")
+                    else:
+                        console.print("You don't have access to this. You aren't an assignee of this task!")
+                        log_user.warning(f"user takes an error you are not available to add assignees to {task.getTitle()} task from {project.getTitle()} project")
+                    GF.prompt()
+                    break
 def collabs_page(user, project):
     os.system('cls')
     log_user = GF.log_actions(user)
@@ -485,7 +488,7 @@ def load_projects_page(user):
         for pr_id in data["projects"]:
             if user.getEmail() == data["projects"][pr_id]["leader"]["email"]:
                 title_list.append(data["projects"][pr_id]["title"])
-                projectID_list.append(data["projects"][pr_id]["title"])
+                projectID_list.append(pr_id)
         title_list.append("Back")
         while True:
             choice = GF.choose_by_key("[bold italic white]\nWhich one of your projects..?" , *title_list)
