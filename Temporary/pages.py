@@ -191,7 +191,7 @@ def project_board_page(user, project):
             #while True:
             choice = GF.choose_by_key("", *tasks_title_and_id)
             if choice == len(tasks_title_and_id) - 1: 
-                break
+                project_board_page(user , project)
             elif choice == 0: #want to add task
                 task_page_by_status(user, project, pd_choice+1)
             else:
@@ -290,7 +290,7 @@ def project_board_page(user, project):
                                     task.addAssignee(project.getCollaborators()[choice])
                                     console.print("[green]Assignee added to the task")
                                     action = pr.History(user.getUsername(), "ASSIGNEE ADDED")
-                                    project.addHistory(action)
+                                    task.addHistory(action)
                                     log_user.info(f"user adds an assignee to {task.getTitle()} task from {project.getTitle()} project")
                         else:
                             assignees = [f'{assi.getUsername()} - {assi.getEmail()}' for assi in task.getAssignees()]
@@ -459,7 +459,7 @@ def load_collab_projects(user):
             project = pr.load_from_file(project_id, user)
             
             while True:
-                choice = GF.choose_by_key(f"[bold italic white]\nWhat do you want to do with {project.getTitle()} project?", "see the project board" , "collaborators", "Back")
+                choice = GF.choose_by_key(f"[bold italic white]\nWhat do you want to do with {project.getTitle()} project?", "see the project board" , "collaborators", "see the project info" , "Back")
                 if choice == 0:
                     project_board_page(user, project)
                 elif choice == 1: # See collabs
@@ -582,6 +582,8 @@ def logout_page(user):
         log_user.info("user logged out")
         GF.prompt()
         menu()
+    else:
+        your_account_page(user)
 
 def task_page(user, project):
     log_user = GF.log_actions(user)
