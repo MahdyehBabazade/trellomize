@@ -121,17 +121,17 @@ def login_page():
 def your_account_page(user):
     os.system('cls')
     choice = GF.choose_by_key("[bold italic white]\nI want to ...\n", "create a new project", "see my projects", "see the projects I'm just a collaborator in", "go to the setting", "logout from my account")
-    if choice == 0:
-        new_project_page(user)
-    elif choice == 1:
-        load_projects_page(user)
-    elif choice == 2:
-        load_collab_projects(user)
-    elif choice == 3:
-        setting(user)
-    elif choice == 3:
-        logout_page(user)
-        
+    while True:
+        if choice == 0:
+            new_project_page(user)
+        elif choice == 1:
+            load_projects_page(user)
+        elif choice == 2:
+            load_collab_projects(user)
+        elif choice == 3:
+            setting(user)
+        elif choice == 4:
+            logout_page(user)
 def new_project_page(user): #COMPLETEDDDDDDDD
     log_user = GF.log_actions(user)
     os.system('cls')
@@ -172,10 +172,8 @@ def new_project_page(user): #COMPLETEDDDDDDDD
         my_project.save_to_file(new_collaborator)
         my_project.addCollaborator(new_collaborator)
         console.print("[bold purple4]You have successfully added a new collaborator")
-        log_user.info(f"user added a new collaborator by email {email} to {title} project")
-        GF.prompt()
-    status = Prompt.ask("What is the status of this task?", choices=["BACKLOG", "TODO", "DOING", "DONE", "ARCHIVED"])
-    task_page_by_status(user, my_project, pr.Status[status].value)
+        log_user.info(f"user added a new collaborator with email {email} to {title} project")
+        project_board_page(user, my_project)
 
 def project_board_page(user, project):
     log_user = GF.log_actions(user)
@@ -515,70 +513,72 @@ def load_projects_page(user):
                 elif choice == 3: 
                     os.system('cls')
                     break
+def edit_profile_page(user):
+    os.system('cls')
+    console = Console()
+    console.print("[bold purple4]We want to be sure it's your account, please enter your password below here:")
+    password = input()
+    login_sys = userlib.Login()
+    log_user = GF.log_actions(user)
+    for attempt in range(5):
+        try:
+            if login_sys.correct_password(user.getEmail(), password):
+                while True:
+                    choice = GF.choose_by_key('What do you want to change?' , 'My username' , 'My password' , 'Back')
+                    if choice == 0:
+                        os.system('cls')
+                        console.print("[bold purple4]Enter your new username:")
+                        new_username = input()
+                        user.changeUsername(new_username)
+                        os.system('cls')
+                        console.print("\n[bold purple4]Your username has been changed successfully!")
+                        log_user.info(f"user has changed his/her username")
+                        GF.prompt()
+                    elif choice == 1:
+                        os.system('cls')
+                        console.print("[bold purple4]Enter your new password.")
+                        new_password = userlib.hashing(input())
+                        user.changePassword(new_password)
+                        os.system('cls')
+                        console.print("\n[bold purple4]Your password has been changed successfully!")
+                        log_user.info(f"user has changed his/her password")
+                        GF.prompt()
+                    elif choice == 2:
+                        os.system('cls')
+                        break
+                break
+        except ValueError as error:
+            os.system('cls')
+            log_user.warning("user takes invalid password error while editing profile in setting")
+            console.print(str(error)+"\n", style="bold red")
+            console.print("Try again: ")
+            console.print("[bold purple4]Enter your password: [/]")
+            password = input()
+
 def setting(user):
     log_user = GF.log_actions(user)
-    choice = GF.choose_by_key("What do you want to do?" , "edit my profile" , "logout" , "Back")
-    if choice == 0:
-        os.system('cls')
-        console = Console()
-        console.print("[bold purple4]We want to be sure it's your account, please enter your password.")
-        password = input()
-        while True:
-            try:
-                if user.getPassword() == userlib.hashing(password):
-                    break
-            except:
-                os.system('cls')
-                log_user.warning("user takes invalid password error while editing profile in setting")
-                console.print("Invalid password"+"\n", style="bold red")
-                console.print("Try again: ")
-                console.print("[bold purple4]Enter your password: [/]")
-                password = input()
-        while True:
-            choice = GF.choose_by_key('What do you want to change?' , 'My username' , 'My password' , 'Back')
-            if choice == 0:
-                os.system('cls')
-                console.print("[bold purple4]Enter your new username.")
-                new_username = input()
-                user.changeUsername(new_username)
-                os.system('cls')
-                console.print("\n[bold purple4]Your username has been changed successfully!")
-                log_user.info(f"user has changed his/her username")
-                GF.prompt()
-                setting(user)
-            elif choice == 1:
-                os.system('cls')
-                console.print("[bold purple4]Enter your new password.")
-                new_password = userlib.hashing(input())
-                user.changePassword(new_password)
-                os.system('cls')
-                console.print("\n[bold purple4]Your password has been changed successfully!")
-                log_user.info(f"user has changed his/her password")
-                GF.prompt()
-                setting(user)
-            elif choice == 2:
-                os.system('cls')
-                break
-
-    elif choice == 1:
-        logout_page(user)
-            
-    elif choice == 2:
-        os.system('cls')
-        your_account_page(user)
+    while True:
+        choice = GF.choose_by_key("What do you want to do?" , "edit my profile" , "logout" , "Back")
+        if choice == 0:
+            edit_profile_page(user)
+        elif choice == 1:
+            # Logout logic here, if any
+            logout_page(user)
+        elif choice == 2:
+            os.system('cls')
+            your_account_page(user)
+            break
 
 
 def logout_page(user):
     log_user = GF.log_actions(user)
-    choice = GF.choose_by_key('Are you sure?' , 'Yes' , 'No')
-    if choice == 0:
+    want_to_logout = Confirm.ask(f'Are you sure? you wanna log out from your account {user.getUsername()}?')
+    if want_to_logout:
         console = Console()
         console.print('You log out successfully.')
         log_user.info("user logged out")
         GF.prompt()
         menu()
-    elif choice == 1:
-        your_account_page(user)
 
 def task_page(user, project):
     log_user = GF.log_actions(user)
