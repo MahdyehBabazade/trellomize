@@ -173,36 +173,16 @@ def new_project_page(user): #COMPLETEDDDDDDDD
         my_project.addCollaborator(new_collaborator)
         console.print("[bold purple4]You have successfully added a new collaborator")
         log_user.info(f"user added a new collaborator with email {email} to {title} project")
-        project_board_page(user, my_project)
+    project_board_page(user, my_project)
 
 def project_board_page(user, project):
     log_user = GF.log_actions(user)
     console = Console()
-    backlogs = ""
-    for i, task in enumerate(project.getTasks()):
-        if task.getStatus() == 1:
-            backlogs += f"{i+1}. {task.getTitle()}\n"
-    todos = ""
-    for i, task in enumerate(project.getTasks()):
-        if task.getStatus() == 2:
-            todos += f"{i+1}. {task.getTitle()}\n"
-    doings = ""
-    for i, task in enumerate(project.getTasks()):
-        if task.getStatus() == 3:
-            doings += f"{i+1}. {task.getTitle()}\n"
-    dones = ""
-    for i, task in enumerate(project.getTasks()):
-        if task.getStatus() == 4:
-            dones += f"{i+1}. {task.getTitle()}\n"
-    archiveds = ""
-    for i, task in enumerate(project.getTasks()):
-        if task.getStatus() == 5:
-            archiveds += f"{i+1}. {task.getTitle()}\n"
     pd_choice = GF.switch_panels(project)
     while True:
         os.system('cls')
         if pd_choice == 5:
-            break
+            your_account_page(user)
         else:
             tasks = [task for task in project.getTasks() if pd_choice + 1 == task.getStatus()]
             tasks_title_and_id = [task.getTitle()+' - '+ task.getTaskID() for task in tasks]
@@ -222,32 +202,46 @@ def project_board_page(user, project):
                     if choice == 0: # remove task
                         want_to_remove = Confirm.ask("Are you sure you want to remove this task?")
                         if want_to_remove:
-                            project.removeTask(task)
+                            task.removeTask(task)
                             console.print('Task successfully deleted.')
                             log_user.info(f"user remove {task.getTitle()} task from {project.getTitle()} project")
                     elif choice == 1: # change title
                         console.print(f"This tasks' title: {task.getTitle()}\nEnter the new title: ")
                         task.changeTitle(input())
                         console.print("[green]Title successfullly changed.")
+                        action = pr.History(user.getUsername(), "TITLE CHANGED")
+                        task.addHistory(action)
                         log_user.info(f"user changed {task.getTitle()} title from {project.getTitle()} project")
+
                     elif choice == 2: # change the status
                         choice = GF.choose_by_key(f"This task's status: {pr.Status(task.getStatus()).name}\nI want to move this task to the: ", "BACKLOG", "TODO", "DOING", "DONE", "ARCHIEVED")
                         task.changeStatus(pr.Status(choice+1).value)
                         console.print("[green]Status successfullly changed.")
+                        action = pr.History(user.getUsername(), "STATUS CHANGED")
+                        task.addHistory(action)
                         log_user.info(f"user changed {task.getTitle()} status from {project.getTitle()} project")
+
                     elif choice == 3: # change the priority
                         choice = GF.choose_by_key(f"This tasks' priority: {pr.Priority(task.getStatus()).name}\nChange its priority to:", "LOW", "MEDIUM", "HIGH", "CRITICAL")
                         task.changePriority(pr.Priority(choice+1).value)
                         console.print("[green]Priority successfullly changed.")
+                        action = pr.History(user.getUsername(), "PRIORITY CHANGED")
+                        task.addHistory(action)
                         log_user.info(f"user changed {task.getTitle()} priority from {project.getTitle()} project")
+
                     elif choice == 4: # change the description
                         console.print(f"This tasks' description: {task.getDescription()}\nWrite the new description here:")
                         task.changeDescription(input())
                         console.print("[green]Description successfullly changed.")
+                        action = pr.History(user.getUsername(), "DESCRIPTION CHANGED")
+                        task.addHistory(action)
                         log_user.info(f"user changed {task.getTitle()} description from {project.getTitle()} project")
+                        
                     elif choice == 5: # comments
+                        print(task.getComments())
                         comments = [f'{cm.getPerson().getUsername()}: {cm.getText()}\n' for cm in task.getComments()]
                         comments.insert(0, "+ Add a comment on this task\n")
+                        comments.append("Back")
                         choice = GF.normal_choose("", *comments)
                         if choice == 0:
                             console.print('Write your comment below here:')
@@ -255,41 +249,49 @@ def project_board_page(user, project):
                             comment = pr.Comment(input(), user)
                             task.addComment(comment)
                             console.print("[green]Comment successfully added.")
+                            action = pr.History(user.getUsername(), "COMMENT ADDED")
+                            task.addHistory(action)
                             log_user.info(f"user added comment to {task.getTitle()} task from {project.getTitle()} project")
+                        elif choice == len(comments)-1:
+                            break
                         else:
                             comment = task.getComments()[choice-1]
-                            if task.getComments()[choice].getPerson().getEmail() == user.getEmail(): # This conditition checks if the user is the writer of this comment
-                                choice1 = GF.choose_by_key("Want do you want to do with this comment?", "edit the comment", "remove the comment")
-                                if choice1 == 0:
-                                    console.print(f'Current comment text: {task.getComments()[choice].getText()}\nEnter the new text for this comment: ')
+                            if comment.getPerson().getEmail() == user.getEmail(): # This conditition checks if the user is the writer of this comment
+                                choice = GF.choose_by_key("Want do you want to do with this comment?", "edit the comment", "remove the comment", "Back")
+                                if choice == 0: # edit comment
+                                    console.print(f'Current comment text: {comment.getText()}\nEnter the new text for this comment: ')
                                     text = input()
-                                    comment = pr.Comment(text, user)
-                                    # بقیه اش کو؟
+                                    comment.setText(text)
+                                    task.editComment(comment)
+                                    action = pr.History(user.getUsername(), "COMMENT EDITED")
+                                    task.addHistory(action)
                                     log_user.info(f"user edited a comment from {task.getTitle()} task from {project.getTitle()} project")
-                                if choice1 == 1:
+                                elif choice == 1:
                                     want_to_remove = Confirm.ask("Are you sure you want to remove this comment?")
                                     if want_to_remove:
-                                        task.deleteComment(task.getComments()[choice])
-                                    log_user.info(f"user remove a comment from {task.getTitle()} task from {project.getTitle()} project")
+                                        task.deleteComment(comment)
+                                        action = pr.History(user.getUsername(), "COMMENT ADDED")
+                                        task.addHistory(action)
+                                        log_user.info(f"user remove a comment from {task.getTitle()} task from {project.getTitle()} project")
+                                elif choice == 2:
+                                    break
                             else:
-                                console.print(f'The text of the comment: {task.getComments()[choice].getText()}\nWho posted it: {task.getComments()[choice].getPerson().getUsername()} ({task.getComments()[choice].getPerson().getEmail()})')
+                                console.print(f'The text of the comment: {comment.getText()}\nWho posted it: {comment.getPerson().getUsername()} ({task.getComments()[choice].getPerson().getEmail()})')
                     elif choice == 6: #assignees
                         assignees = [f'{assi.getUsername()} - {assi.getEmail()}' for assi in task.getAssignees()]
                         if user.getEmail() == project.getLeader().getEmail():  # this had error project.getProject? and still have error
                             choice = GF.choose_by_key("", "+ Add an assignee for this task", *assignees)
                             if choice == 0:
-                                console.print('Write the email of the assignee you want to add: ')
-                                assi_email = input()
-                                while True:
-                                    filename = os.path.join("AllFiles\\Users", f"{assi_email}.json")
-                                    if not os.path.exists(filename):
-                                        console.print('User does not exist! Try another one: ')
-                                        assi_email = input()
-                                        log_user.warning(f"user takes a file not exist error while adding assignees from {task.getTitle()} task from {project.getTitle()} project")
-                                    else:
-                                        project.addCollaborator(userlib.User(assi_email, GF.load_the_data(assi_email)["username"], GF.load_the_data(assi_email)["password"], True))
-                                        console.print("[green]Assignee added to the task")
-                                        log_user.info(f"user add a assignee from {task.getTitle()} task from {project.getTitle()} project")
+                                want_to_add_assignee = Confirm.ask('Wanna add any assignee?')        
+                                if want_to_add_assignee:
+                                    console.print('Choose the assignee: ')
+                                    collaborators = [collab.getUsername() for collab in project.getCollaborators()]
+                                    choice = GF.normal_choose("", *collaborators) # Choosing one collaborator as the assignee of the task
+                                    task.addAssignee(project.getCollaborators()[choice])
+                                    console.print("[green]Assignee added to the task")
+                                    action = pr.History(user.getUsername(), "ASSIGNEE ADDED")
+                                    project.addHistory(action)
+                                    log_user.info(f"user adds an assignee to {task.getTitle()} task from {project.getTitle()} project")
                         else:
                             assignees = [f'{assi.getUsername()} - {assi.getEmail()}' for assi in task.getAssignees()]
                             for assignee in assignees:
@@ -319,6 +321,7 @@ def project_board_page(user, project):
 def collabs_page(user, project):
     os.system('cls')
     log_user = GF.log_actions(user)
+    console = Console()
     while True:
         choice = GF.choose_by_key("[bold italic white]\nWhat do you want to do with collaborators?" , "see collaborators" , "add collaborator" , "remove collaborator" , "Back")
         if choice == 0: # See collabs
@@ -373,7 +376,6 @@ def collabs_page(user, project):
                 collab_emails = [collab.getEmail() for collab in project.getCollaborators()]
                 collab_emails.append("Back")
                 choice = GF.normal_choose("[bold italic white]\nWhich one of the collaborators do you want to remove from the project?", *collab_emails)
-                print(choice)
                 if choice == len(collab_emails)-1:
                     break
                 else:
@@ -384,7 +386,8 @@ def collabs_page(user, project):
                         console.print("[bold purple4]You have successfully removed a collaborator")
                         log_user.info(f"user has removed a collab from {project.getTitle()} project")
                     else:
-                        console.print("You can't remove yourself from your own project!")
+                        console.print("You can't remove yourself from your own project!", style="red")
+                    GF.prompt()
             else:
                 console.print("You are not the leader. You cannot remove anyone from the project")
                 log_user.warning(f"user takes an error that you are not availabe to remove anyone from {project.getTitle()} project")
@@ -620,7 +623,7 @@ def task_page_by_status(user, project, status=pr.Status.BACKLOG): # COMPLETEDDDD
     if want_to_add_assignee:
         console.print('Choose the assignee: ')
         collaborators = [collab.getUsername() for collab in project.getCollaborators()]
-        choice = GF.choose_by_key('Enter a title for you task:\n'+title+'\nHow important is this task?\nWanna add any assignee?\ny', *collaborators) # Choosing one collaborator as the assignee of the task
+        choice = GF.normal_choose('Enter a title for you task:\n'+title+'\nHow important is this task?\nWanna add any assignee?\ny', *collaborators) # Choosing one collaborator as the assignee of the task
         task.addAssignee(project.getCollaborators()[choice])
     want_to_add_description = Confirm.ask('Wanna add any description?')
     if want_to_add_description:

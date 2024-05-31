@@ -124,6 +124,7 @@ class Task:
         self.__assignees = []
         self.__description = ''
         self.__project = project
+        self.__history = []
         
 
     # Getters
@@ -160,19 +161,24 @@ class Task:
     # Change Functions
     
     def write_to_the_file(self, field, new):
+    
         data = GF.load_the_collaborators_data(*[collab.getEmail() for collab in self.__project.getCollaborators()])
         for collaborator_data in data:
-            for i in range(len(collaborator_data['projects'][self.__project.getProjectID()]["tasks"])):
-                collaborator_data['projects'][self.__project.getProjectID()]['tasks'][i][field] = new
-                filename = os.path.join("AllFiles\\Users", f"{collaborator_data['email']}.json")
-                with open(filename, 'w') as f:
-                    json.dump(collaborator_data, f, indent=4)
+            project_tasks = collaborator_data['projects'][self.__project.getProjectID()]["tasks"]
+            for task in project_tasks:
+                if task["taskID"] == self.__taskID:
+                    task[field] = new        
+        filename = os.path.join("AllFiles\\Users", f"{collaborator_data['email']}.json")
+        with open(filename, 'w') as f:
+            json.dump(collaborator_data, f, indent=4)
 
     def changeTitle(self, title):
         self.__title = title
         self.write_to_the_file('title', self.__title)
     def changeStatus(self, status):
         self.__status = status
+        if status == 4:
+            self.setEndTime((datetime.datetime.now()).isoformat())
         self.write_to_the_file('status', self.__status)
     def changePriority(self, priority):
         self.__priority = priority
@@ -190,26 +196,51 @@ class Task:
         self.__comments.append(comment)
         data = GF.load_the_collaborators_data(*[collab.getEmail() for collab in self.__project.getCollaborators()])
         for collaborator_data in data:
-            for i in range(len(collaborator_data['projects'][self.__project.getProjectID()]["tasks"])):
-                collaborator_data['projects'][self.__project.getProjectID()]["tasks"][i]['comments'].append(comment.to_dict())
-                GF.write_to_the_file(collaborator_data)
-                    
+            project_tasks = collaborator_data['projects'][self.__project.getProjectID()]["tasks"]
+            for task in project_tasks:
+                if task["taskID"] == self.__taskID:
+                    task['comments'].append(comment.to_dict())
+                    GF.write_to_the_file(collaborator_data)
+    def editComment(self, comment):        
+        data = GF.load_the_collaborators_data(*[collab.getEmail() for collab in self.__project.getCollaborators()])
+        for collaborator_data in data:
+            project_tasks = collaborator_data['projects'][self.__project.getProjectID()]["tasks"]
+            for task in project_tasks:
+                if task["taskID"] == self.__taskID:
+                    comments = [cm for cm in task['comments']]
+                    for cm in comments:
+                        if cm['commentID'] == comment.getCommentID(): 
+                            cm['text'] = comment.getText()
+                            GF.write_to_the_file(collaborator_data)
     def deleteComment(self, comment):
         self.__comments.remove(comment)
         data = GF.load_the_collaborators_data(*[collab.getEmail() for collab in self.__project.getCollaborators()])
         for collaborator_data in data:
-            for i in range(len(collaborator_data['projects'][self.__project.getProjectID()]["tasks"])):
-                collaborator_data['projects'][self.__project.getProjectID()]["tasks"][i]['comments'].remove(comment.to_dict())
-                GF.write_to_the_file(collaborator_data)
+            project_tasks = collaborator_data['projects'][self.__project.getProjectID()]["tasks"]
+            for task in project_tasks:
+                if task["taskID"] == self.__taskID:
+                    task['comments'].remove(comment.to_dict())
+                    GF.write_to_the_file(collaborator_data)
                 
     def addAssignee(self, assignee):
         self.__assignees.append(assignee)
         data = GF.load_the_collaborators_data(*[collab.getEmail() for collab in self.__project.getCollaborators()])
         for collaborator_data in data:
-            for i in range(len(collaborator_data['projects'][self.__project.getProjectID()]["tasks"])):
-                collaborator_data['projects'][self.__project.getProjectID()]["tasks"][i]["assignees"].append(assignee.to_dict())
-                GF.write_to_the_file(collaborator_data)
-                
+            project_tasks = collaborator_data['projects'][self.__project.getProjectID()]["tasks"]
+            for task in project_tasks:
+                if task["taskID"] == self.__taskID:
+                    task["assignees"].append(assignee.to_dict())
+                    GF.write_to_the_file(collaborator_data)
+    
+    def addHistory(self, action):
+        self.__history.append(action)
+        data = GF.load_the_collaborators_data(*[collab.getEmail() for collab in self.__project.getCollaborators()])
+        for collaborator_data in data:
+            project_tasks = collaborator_data['projects'][self.__project.getProjectID()]["tasks"]
+            for task in project_tasks:
+                if task["taskID"] == self.__taskID:
+                    task['history'].append(action.to_dict())
+                    GF.write_to_the_file(collaborator_data)
     
     def to_dict(self):
         return {
@@ -221,7 +252,8 @@ class Task:
             'endtime': self.__endtime,
             'comments': [],
             'description' : self.__description,
-            'assignees' : [assignee.to_dict() for assignee in self.__assignees]
+            'assignees' : [assignee.to_dict() for assignee in self.__assignees],
+            'history': []
         }
 
 def load_from_file(project_id, user):
@@ -240,15 +272,24 @@ def load_from_file(project_id, user):
                     task = Task(task_dict['title'], project, task_dict['status'], task_dict['priority'])
                     task.setTaskID(task_dict['taskID'])
                     task.setEndTime(task_dict['endtime'])
-                    task.setComments(task_dict['comments'])
+                    comments = [Comment(comment_dict['text'], 
+                                        userlib.User(comment_dict['person']['email'], 
+                                                     comment_dict['person']['username'], 
+                                                     comment_dict['person']['password'], 
+                                                     comment_dict['person']['isActive']), 
+                                        comment_dict['time'], comment_dict['commentID']) 
+                                for comment_dict in task_dict['comments']]
+                    task.setComments(comments)
                     project.setTask(task)
+
                 return project
 
 class Comment:
-    def __init__(self, text, person, time=(datetime.datetime.now()).isoformat()) -> None:
+    def __init__(self, text, person, time=(datetime.datetime.now()).isoformat(), id = str(uuid.uuid1())):
         self.__text = text
         self.__person =  person
         self.__time = time
+        self.__id = id
 
     def getText(self):
         return self.__text
@@ -256,6 +297,8 @@ class Comment:
         return self.__person
     def getTime(self):
         return self.__time
+    def getCommentID(self):
+        return self.__id
     
     def setText(self, text):
         self.__text = text
@@ -264,5 +307,22 @@ class Comment:
         return {
             'text': self.__text,
             'person': self.__person.to_dict(),
-            'time': self.__time
+            'time': self.__time,
+            'commentID': self.__id
+        }
+    
+class History:
+    def __init__(self, username, action, time=(datetime.datetime.now()).isoformat()):
+        self.__username = username
+        self.__action = action
+        self.__time = time
+        
+
+    def getAction(self):
+        return self.__action
+    def to_dict(self):
+        return {
+            'username': self.__username,
+            'action': self.__action,
+            'time': self.__time,
         }

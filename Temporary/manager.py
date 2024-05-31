@@ -107,6 +107,9 @@ def purge_data():
         if os.path.exists(directory):
             shutil.rmtree(directory)
             print("All data has been purged.")
+        directory = "AllFiles/Logs"
+        if os.path.exists(directory):
+            shutil.rmtree(directory)
     else:
         print("Purge data operation canceled.")
 

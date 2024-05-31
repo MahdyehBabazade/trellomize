@@ -137,13 +137,13 @@ def switch_panels(project: pr.Project):
         if task.getStatus() == 1:
             panels["BACKLOG"] += f"#{i+1}: {task.getTitle()}\n"
         elif task.getStatus() == 2:
-            panels["TODO"] += f"{i+1}. {task.getTitle()}\n"
+            panels["TODO"] += f"#{i+1}. {task.getTitle()}\n"
         elif task.getStatus() == 3:
-            panels["DOING"] += f"{i+1}. {task.getTitle()}\n"
+            panels["DOING"] += f"#{i+1}. {task.getTitle()}\n"
         elif task.getStatus() == 4:
-            panels["DONE"] += f"{i+1}. {task.getTitle()}\n"
+            panels["DONE"] += f"#{i+1}. {task.getTitle()}\n"
         elif task.getStatus() == 5:
-            panels["ARCHIVED"] += f"{i+1}. {task.getTitle()}\n"
+            panels["ARCHIVED"] += f"#{i+1}. {task.getTitle()}\n"
 
     layout = Layout()
     layout.split(
